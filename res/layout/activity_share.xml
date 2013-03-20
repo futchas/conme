@@ -1,0 +1,40 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="20dp"
+    tools:context=".ShareActivity" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+	    <TextView
+	        android:id="@+id/textView2"
+	        android:layout_weight="1"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:text="@string/txt_toggle_share"
+	        android:textAppearance="?android:attr/textAppearanceMedium" />
+	
+	    <ToggleButton
+	        android:id="@+id/toggleAP"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" 
+	        android:onClick="toggleAP"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/listConnectedClients"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/linearLayout1"
+        android:layout_marginTop="60dp"
+        android:text="@string/txt_clients_none"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</RelativeLayout>

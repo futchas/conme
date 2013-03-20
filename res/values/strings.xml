@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ConMe - Connect me</string>
+    <string name="app_description">Save money by accessing the internet connection of others or share yours to earn credits</string>
+    <string name="menu_settings">Settings</string>
+    <string name="btn_share">Share your connection</string>
+    <string name="btn_access">Connect to the internet</string>
+    <string name="txt_or">or</string>
+    <string name="title_activity_share">Share your internet access</string>
+    <string name="txt_toggle_share">Enable to share internet</string>
+    <string name="txt_clients_none">Connected Users: None</string>
+    <string name="txt_clients">Connected Users</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_connect">Connect to the internet</string>
+
+</resources>

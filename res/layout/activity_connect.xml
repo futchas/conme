@@ -1,0 +1,52 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#222222"
+    tools:context=".ConnectActivity" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="3dp"
+        android:text="ConMe networks"
+        android:textColor="#ffffff"
+        android:textStyle="bold" 
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+    <ListView
+        android:id="@+id/conMeNetworkList"
+        android:divider="#222222"
+        android:dividerHeight="2dp"
+        android:background="@drawable/rounded_corners2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </ListView>
+    
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="3dp"
+        android:text="All other networks"
+        android:textColor="#ffffff"
+        android:textStyle="bold"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+    <ListView
+        android:id="@+id/otherNetworkList"
+		android:divider="#222222"
+        android:dividerHeight="1dp"
+        android:background="@drawable/rounded_corners"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+		
+    </ListView>
+
+</LinearLayout>
