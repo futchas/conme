@@ -32,8 +32,8 @@ public class WiFiScanReceiver extends BroadcastReceiver {
 		for (ScanResult result : results) {
 			
 			String network = result.SSID;
-			String cap = result.capabilities;
-			boolean isWPA = result.capabilities.contains("WPA");
+//			String cap = result.capabilities;
+//			boolean isWPA = result.capabilities.contains("WPA");
 			
 			if(network != null && network.startsWith("Blablu") /*&& network.length() == 7 && isWPA*/) {
 				conMeNetworks.add(result);
@@ -47,7 +47,6 @@ public class WiFiScanReceiver extends BroadcastReceiver {
 		
 		ConnectActivity conActivity = (ConnectActivity)c;
 		conActivity.showNetworksInList(conMeNetworks,otherNetworks);
-				
 	}
 
 

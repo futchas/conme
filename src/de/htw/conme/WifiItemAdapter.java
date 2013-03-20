@@ -67,7 +67,7 @@ public class WifiItemAdapter extends ArrayAdapter<ScanResult> {
 			details.append("Connected");
 		} else {
 			String cap = result.capabilities;
-			details.append("Secured with ");
+			details.append("Security: ");
 			String[] securityModes = { "WEP", "WPA", "WPA2" };
 			boolean hasAlreadyMode = false;
 			for(String mode : securityModes) {
@@ -79,8 +79,9 @@ public class WifiItemAdapter extends ArrayAdapter<ScanResult> {
 					details.append(mode);
 				}
 			}
+			//Open network (not secured)
 			if(!hasAlreadyMode)
-				details  = new StringBuilder("Not secured");
+				details.append("None");
 		}
 
     	holder.wifi_ssid.setText(ssid);

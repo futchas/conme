@@ -9,6 +9,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -21,19 +22,22 @@ public class AlertDialogPositiveClicked implements OnClickListener {
 	private String ssid;
 	private Context context;
 	private WifiManager wifi;
+	private TextView wifiDetails;
 
 	/**
 	 * @param context 
 	 * @param wifi 
 	 * @param ssid 
 	 * @param isConnected 
+	 * @param wifiDetails 
 	 * 
 	 */
-	public AlertDialogPositiveClicked(Context context, WifiManager wifi, String ssid, boolean isConnected) {
+	public AlertDialogPositiveClicked(Context context, WifiManager wifi, String ssid, boolean isConnected, TextView wifiDetails) {
 		this.context = context;
 		this.wifi = wifi;
 		this.isConnected = isConnected;
 		this.ssid = ssid;
+		this.wifiDetails = wifiDetails;
 	}
 
 	/* (non-Javadoc)
@@ -50,7 +54,6 @@ public class AlertDialogPositiveClicked implements OnClickListener {
 
 			ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 			NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
 			if(wifiInfo.isConnectedOrConnecting()) {
 				disconnect();
 			}
@@ -59,14 +62,17 @@ public class AlertDialogPositiveClicked implements OnClickListener {
 			wifi.enableNetwork(netId, true);
 			wifi.reconnect();
 			
+			wifiDetails.setText("Connecting");
 		    Toast.makeText(context,"You are connecting to following wifi network: " + ssid, Toast.LENGTH_LONG).show();
 		}
 		
+		wifi.startScan();
 
 	}
 	
 	private void disconnect() {
 		wifi.disconnect();
+		wifiDetails.setText("Disconnected");
 		Toast.makeText(context,"You are disconnecting from the current wifi network!", Toast.LENGTH_SHORT).show();
 	}
 

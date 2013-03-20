@@ -1,6 +1,8 @@
 package de.htw.conme;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -24,6 +26,9 @@ public class ConnectActivity extends Activity {
 	private BroadcastReceiver receiver;
 	private ListView conMeNetworkList;
 	private ListView otherNetworkList;
+//	private NetChangedReceiver netChangedReceiver;
+	private final int wifiScanInterval = 10000;
+	private Timer timer;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,14 +39,20 @@ public class ConnectActivity extends Activity {
 		otherNetworkList = (ListView) findViewById(R.id.otherNetworkList);
 		
 		wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-		scanWifiNetworks();
+//		scanWifiNetworks();
 		
 		if (receiver == null)
 			receiver = new WiFiScanReceiver(wifi);
 		
+//		if (netChangedReceiver == null)
+//			netChangedReceiver = new NetChangedReceiver();
+		
+//		registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+//		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+		
 	}
 	
-	public void showNetworksInList(final List<ScanResult> conMeNetworks, List<ScanResult> otherNetworks){
+	public void showNetworksInList(List<ScanResult> conMeNetworks, List<ScanResult> otherNetworks){
 		
 		WifiItemAdapter conMeAdapter = new WifiItemAdapter(this, conMeNetworks, wifi);
 		conMeNetworkList.setAdapter(conMeAdapter); 
@@ -67,11 +78,29 @@ public class ConnectActivity extends Activity {
 	public void onPause() {
 		super.onPause();
 		unregisterReceiver(receiver);
+		timer.cancel();
+//		unregisterReceiver(netChangedReceiver);
 	}
 	
 	public void onResume() {
 		super.onResume();
 		registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		
+//		scanWifiNetworks();
+		
+		timer = new Timer();
+				
+		TimerTask timerTask = new TimerTask() {
+			@Override
+			public void run() {
+				scanWifiNetworks();				
+			}
+		};
+		//Run Task every 5 seconds
+		timer.scheduleAtFixedRate(timerTask, 0, wifiScanInterval);
+
+//		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+//		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION));
 	}
 	
 	private void scanWifiNetworks() {
@@ -91,5 +120,6 @@ public class ConnectActivity extends Activity {
 		getMenuInflater().inflate(R.menu.activity_connect, menu);
 		return true;
 	}
+
 
 }
