@@ -10,11 +10,15 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.widget.Toast;
 
-public class WiFiScanReceiver extends BroadcastReceiver {
+/**
+ * @author Iyad Al-Sahwi
+ *
+ */
+public class ScanWifiReceiver extends BroadcastReceiver {
 
 	private WifiManager wifi;
 	
-	public WiFiScanReceiver(WifiManager wifi) {
+	public ScanWifiReceiver(WifiManager wifi) {
 		super();
 		this.wifi = wifi;
 	}

@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package de.htw.conme;
 
 import java.util.List;
@@ -20,6 +23,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
+/**
+ * @author Iyad Al-Sahwi
+ *
+ */
 public class ConnectActivity extends Activity {
 
 	private WifiManager wifi;
@@ -41,7 +48,7 @@ public class ConnectActivity extends Activity {
 		wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 		
 		if (receiver == null)
-			receiver = new WiFiScanReceiver(wifi);
+			receiver = new ScanWifiReceiver(wifi);
 		
 //		if (netChangedReceiver == null)
 //			netChangedReceiver = new NetChangedReceiver();

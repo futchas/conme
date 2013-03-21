@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 
+/**
+ * @author Iyad Al-Sahwi
+ *
+ */
 public class ConMe extends Activity {
 
 	@Override

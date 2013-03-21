@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package de.htw.conme;
 
 import android.app.Activity;
@@ -7,6 +10,10 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+/**
+ * @author Iyad Al-Sahwi
+ *
+ */
 public class ShareActivity extends Activity {
 
 	private WifiConfig wifiConfig;
