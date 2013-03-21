@@ -39,7 +39,7 @@ public class ScanWifiReceiver extends BroadcastReceiver {
 //			String cap = result.capabilities;
 //			boolean isWPA = result.capabilities.contains("WPA");
 			
-			if(network != null && network.startsWith("Blablu") /*&& network.length() == 7 && isWPA*/) {
+			if(network != null && network.startsWith("WLAN-") /*&& network.length() == 7 && isWPA*/) {
 				conMeNetworks.add(result);
 				if (bestSignal == null || WifiManager.compareSignalLevel(bestSignal.level, result.level) < 0)
 					bestSignal = result;

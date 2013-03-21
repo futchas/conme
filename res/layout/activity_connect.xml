@@ -6,26 +6,36 @@
     android:background="#222222"
     tools:context=".ConnectActivity" >
 
-    <TextView
-        android:id="@+id/textView1"
+
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginBottom="3dp"
-        android:text="ConMe networks"
-        android:textColor="#ffffff"
-        android:textStyle="bold" 
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_height="280dp" >
     
-    <ListView
-        android:id="@+id/conMeNetworkList"
-        android:divider="#222222"
-        android:dividerHeight="2dp"
-        android:background="@drawable/rounded_corners2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </ListView>
+	    <TextView
+	        android:id="@+id/textView1"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:layout_marginLeft="10dp"
+	        android:layout_marginBottom="3dp"
+	        android:text="ConMe networks"
+	        android:textColor="#ffffff"
+	        android:textStyle="bold" 
+	        android:textAppearance="?android:attr/textAppearanceMedium" />
+	    
+	    <ListView
+	        android:id="@+id/conMeNetworkList"
+	        android:divider="#222222"
+	        android:dividerHeight="2dp"
+	        android:background="@drawable/rounded_corners2"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	    </ListView>
+    
+    </LinearLayout>
+     
+    
     
     <TextView
         android:id="@+id/textView2"
@@ -46,7 +56,6 @@
         android:background="@drawable/rounded_corners"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-		
     </ListView>
 
 </LinearLayout>
