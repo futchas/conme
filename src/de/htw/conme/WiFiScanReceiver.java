@@ -43,7 +43,7 @@ public class WiFiScanReceiver extends BroadcastReceiver {
 				otherNetworks.add(result);
 		}
 		
-		scanResultToast(c, bestSignal.SSID, conMeNetworks.size(), otherNetworks.size());
+//		scanResultToast(c, bestSignal.SSID, conMeNetworks.size(), otherNetworks.size());
 		
 		ConnectActivity conActivity = (ConnectActivity)c;
 		conActivity.showNetworksInList(conMeNetworks,otherNetworks);

@@ -39,7 +39,6 @@ public class ConnectActivity extends Activity {
 		otherNetworkList = (ListView) findViewById(R.id.otherNetworkList);
 		
 		wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-//		scanWifiNetworks();
 		
 		if (receiver == null)
 			receiver = new WiFiScanReceiver(wifi);
@@ -77,8 +76,10 @@ public class ConnectActivity extends Activity {
 	
 	public void onPause() {
 		super.onPause();
-		unregisterReceiver(receiver);
-		timer.cancel();
+		if(receiver != null)
+			unregisterReceiver(receiver);
+		if(timer != null)
+			timer.cancel();
 //		unregisterReceiver(netChangedReceiver);
 	}
 	
@@ -86,32 +87,35 @@ public class ConnectActivity extends Activity {
 		super.onResume();
 		registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		
-//		scanWifiNetworks();
+		WifiApManager accessPointManager = new WifiApManager(wifi);
 		
-		timer = new Timer();
-				
-		TimerTask timerTask = new TimerTask() {
-			@Override
-			public void run() {
-				scanWifiNetworks();				
-			}
-		};
-		//Run Task every 5 seconds
-		timer.scheduleAtFixedRate(timerTask, 0, wifiScanInterval);
-
-//		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
-//		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION));
+		//Unfortunately it's not possible to tether and use Wifi simultaneously.
+		//disable access point if it's enabled
+		if(accessPointManager.isWifiApEnabled()) {
+			ChangeAPState changeApState = new ChangeAPState(this, accessPointManager, false);
+			changeApState.execute();
+		}else
+			onResumeFurther();
 	}
 	
-	private void scanWifiNetworks() {
-		
+	public void onResumeFurther() {
 		//enable Wifi if it's disabled
 		if(wifi.getWifiState() == WifiManager.WIFI_STATE_DISABLED) {
 			Toast.makeText(getApplicationContext(), "Wifi is disabled! It will be enabled now.",Toast.LENGTH_LONG).show();
             wifi.setWifiEnabled(true);
 		}
 		
-		wifi.startScan();
+		timer = new Timer();
+			
+		TimerTask timerTask = new TimerTask() {
+			@Override
+			public void run() {
+				wifi.startScan();			
+			}
+		};
+		
+		//Run Task every configured interval in ms
+		timer.scheduleAtFixedRate(timerTask, 0, wifiScanInterval);
 	}
 
 	@Override

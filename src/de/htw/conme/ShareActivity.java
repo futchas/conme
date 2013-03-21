@@ -1,8 +1,7 @@
 package de.htw.conme;
 
-import java.util.ArrayList;
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
@@ -13,6 +12,7 @@ public class ShareActivity extends Activity {
 	private WifiConfig wifiConfig;
 	private WifiApManager wifiApManager;
 	private TextView listConnectedClients;
+	private ToggleButton toggleAPButton;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -20,12 +20,55 @@ public class ShareActivity extends Activity {
 		setContentView(R.layout.activity_share);
 		
 		listConnectedClients = (TextView) findViewById(R.id.listConnectedClients);
+		toggleAPButton = (ToggleButton) findViewById(R.id.toggleAP);
 		
 		wifiApManager = new WifiApManager(this);
-		wifiConfig = new WifiConfig(true);
 		
-		scanConnectedClients();
+		// generate uniqueNumber
+		//SSID = "WLAN-" + uniqueNumber
+		//KEY = encrypt(uniqueNumber);
+		
+		String ssid = "WLAN-T3XH7UW2B5";
+		String key = "f409!k23c#d.92" + ssid.substring(5, 15);
+		wifiConfig = new WifiConfig(ssid, key, true);
 	}
+	
+	
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		
+	}
+
+
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		boolean isWifiApEnabled = wifiApManager.isWifiApEnabled();
+		toggleAPButton.setChecked(isWifiApEnabled);
+		
+		showConnectedClients(true,isWifiApEnabled);
+	}
+
+
+
+	protected void showConnectedClients(boolean hasAPStateChanged, boolean isAPEnabled) {
+		
+		//if AP couldn't be enabled/disabled then toggle back the button
+		if(!hasAPStateChanged) 
+			toggleAPButton.setChecked(!toggleAPButton.isChecked());
+
+		if(isAPEnabled) {
+			loadConnectedClients();		
+		}else
+			listConnectedClients.setText("");
+	}
+
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -34,25 +77,11 @@ public class ShareActivity extends Activity {
 		return true;
 	}
 
-	private void scanConnectedClients() {
+	private void loadConnectedClients() {
 		
-//		Log.i("Hotspot Info", "mWifiManager.getDhcpInfo().gateway: " + wifiApManager.getmWifiManager().getDhcpInfo().gateway);
-//		Log.i("Hotspot Info", "mWifiManager.getDhcpInfo().dns1: " + wifiApManager.getmWifiManager().getDhcpInfo().dns1);
-//		Log.i("Hotspot Info", "mWifiManager.getDhcpInfo().dns2: " + wifiApManager.getmWifiManager().getDhcpInfo().dns2);
+		ClientListTask clientIPTask = new ClientListTask(wifiApManager, listConnectedClients);
+		clientIPTask.execute();
 		
-		ArrayList<ClientScanResult> clients = wifiApManager.getClientList(false);
-		
-		listConnectedClients.setText(clients.size() + " " + getString(R.string.txt_clients) + "\n\n");
-
-//		listConnectedClients.append("Clients: \n");
-		for (ClientScanResult clientScanResult : clients) {
-			//ip = clientScanResult.getIpAddr();
-//			textView1.append("####################\n");
-			listConnectedClients.append("IpAddr: " + clientScanResult.getIpAddr() + "\n");
-//			textView1.append("Device: " + clientScanResult.getDevice() + "\n");
-//			textView1.append("HWAddr: " + clientScanResult.getHWAddr() + "\n");
-//			textView1.append("isReachable: " + clientScanResult.isReachable() + "\n");
-		}
 		
 //		textView1.append("gateway: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().gateway) + "\n");
 //		textView1.append("dns1: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().dns1) + "\n");
@@ -70,11 +99,12 @@ public class ShareActivity extends Activity {
 	}
 
 	public void toggleAP(View view) {
-		boolean on = ((ToggleButton) view).isChecked();
-		if(on)
-			wifiApManager.setWifiApEnabled(wifiConfig, true);
-		else
-			wifiApManager.setWifiApEnabled(wifiConfig, false);
+		
+		boolean isChecked = ((ToggleButton) view).isChecked();
+		
+		ChangeAPState changeApState = new ChangeAPState(this, wifiApManager, isChecked);
+		changeApState.execute(wifiConfig);
+		
 	}
 
 

@@ -49,7 +49,8 @@ public class AlertDialogPositiveClicked implements OnClickListener {
 		if(isConnected) {
 			disconnect();
 		} else {
-			String key = "badabum" + ssid.substring(8, 12);
+			String key = "f409!k23c#d.92" + ssid.substring(5, 15);
+//			String key = "badabum" + ssid.substring(8, 12);
 			WifiConfig wifiConfig = new WifiConfig(ssid, key, false);
 
 			ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -63,7 +64,7 @@ public class AlertDialogPositiveClicked implements OnClickListener {
 			wifi.reconnect();
 			
 			wifiDetails.setText("Connecting");
-		    Toast.makeText(context,"You are connecting to following wifi network: " + ssid, Toast.LENGTH_LONG).show();
+		    Toast.makeText(context,"You are connecting to following wifi network: " + ssid, Toast.LENGTH_SHORT).show();
 		}
 		
 		wifi.startScan();

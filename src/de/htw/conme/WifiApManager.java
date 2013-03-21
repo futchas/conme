@@ -24,6 +24,10 @@ public class WifiApManager {
 		
 	}
 	
+	public WifiApManager(WifiManager readyWifiManager) {
+		mWifiManager = readyWifiManager;
+	}
+
 	/**
      * Start AccessPoint mode with the specified
      * configuration. If the radio is already running in
@@ -45,6 +49,20 @@ public class WifiApManager {
 			Log.e(this.getClass().toString(), "", e);
 			return false;
 		}
+	}
+	
+	private void setWifiTetheringEnabled(boolean enable) {
+
+	    Method[] methods = mWifiManager.getClass().getDeclaredMethods();
+	    for (Method method : methods) {
+	        if (method.getName().equals("setWifiApEnabled")) {
+	            try {
+	                method.invoke(mWifiManager, null, enable);
+	            } catch (Exception ex) {
+	            }
+	            break;
+	        }
+	    }
 	}
 	
 	/**
