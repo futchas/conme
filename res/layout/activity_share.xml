@@ -28,12 +28,22 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/listConnectedClients"
+        android:id="@+id/serverState"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/linearLayout1"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="40dp"
+        android:text="Nothing yet"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+    <TextView
+        android:id="@+id/listConnectedClients"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/serverState"
+        android:layout_marginTop="20dp"
         android:text="@string/txt_clients_none"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 

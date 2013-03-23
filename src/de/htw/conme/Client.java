@@ -1,5 +1,5 @@
 /**
- * 
+ *	Copyright (C) 2013 by Iyad Al-Sahwi
  */
 package de.htw.conme;
 
@@ -8,11 +8,16 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * @author Iyad Al-sahwi
@@ -20,12 +25,12 @@ import android.widget.TextView;
  */
 public class Client extends AsyncTask<Integer, Void, Socket> {
 
-	private WifiApManager wifiApManager;
-	private TextView textView1;
+	private WifiManager wifi;
+	private Context context;
 	
-	public Client(WifiApManager wifiApManager, TextView textView1) {
-		this.wifiApManager = wifiApManager;
-		this.textView1 = textView1;
+	public Client(Context context, WifiManager wifiManager) {
+		this.context = context;
+		this.wifi = wifiManager;
 	}
 	
 	@Override
@@ -34,10 +39,10 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 	//	ip = getLocalIpAddress();
 		String ip = "192.168.1.1";
 	    try {
-	    	//InetAddress ip2 =InetAddress.getByName("Blablub");
+//	    	InetAddress ip2 =InetAddress.getByName("Blablub");
 	    	//Log.i("TcpClient", "sent: " + ip2);
-	    	int ipAdress = wifiApManager.getmWifiManager().getConnectionInfo().getIpAddress();
-	    	String gateway = intToIp(wifiApManager.getmWifiManager().getDhcpInfo().gateway);
+	    	int ipAdress = wifi.getConnectionInfo().getIpAddress();
+	    	String gateway = intToIp(wifi.getDhcpInfo().gateway);
 	    	Socket socket = new Socket(gateway, params[0]);
 	        return socket;
 	
@@ -71,14 +76,16 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 			out.write(outMsg);
 			out.flush();
 			
-			textView1.append("\nclient sent: " + outMsg + "\n");
+			Toast.makeText(context, "\nclient sent: " + outMsg + "\n", Toast.LENGTH_LONG).show();
+//			textView1.append("\nclient sent: " + outMsg + "\n");
 	        Log.i("TcpClient", "sent: " + outMsg);
 
 	        //accept server response
 	        String inMsg = in.readLine() + System.getProperty("line.separator");
 
 	        Log.i("TcpClient", "received: " + inMsg);
-	        textView1.append("client received: " + inMsg + "\n");
+			Toast.makeText(context, "client received: " + inMsg + "\n", Toast.LENGTH_LONG).show();
+//	        textView1.append("client received: " + inMsg + "\n");
 	        
 	        socket.close();
 	        

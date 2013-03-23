@@ -20,6 +20,7 @@ public class ShareActivity extends Activity {
 	private WifiApManager wifiApManager;
 	private TextView listConnectedClients;
 	private ToggleButton toggleAPButton;
+	private TextView serverState;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +28,7 @@ public class ShareActivity extends Activity {
 		setContentView(R.layout.activity_share);
 		
 		listConnectedClients = (TextView) findViewById(R.id.listConnectedClients);
+		serverState = (TextView) findViewById(R.id.serverState);
 		toggleAPButton = (ToggleButton) findViewById(R.id.toggleAP);
 		
 		wifiApManager = new WifiApManager(this);
@@ -40,15 +42,12 @@ public class ShareActivity extends Activity {
 		wifiConfig = new WifiConfig(ssid, key, true);
 	}
 	
-	
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		
-		
-	}
 
+	}
 
 
 	@Override
@@ -56,9 +55,9 @@ public class ShareActivity extends Activity {
 		super.onResume();
 		
 		boolean isWifiApEnabled = wifiApManager.isWifiApEnabled();
+
 		toggleAPButton.setChecked(isWifiApEnabled);
-		
-		showConnectedClients(true,isWifiApEnabled);
+		showConnectedClients(true, isWifiApEnabled);
 	}
 
 
@@ -70,6 +69,8 @@ public class ShareActivity extends Activity {
 			toggleAPButton.setChecked(!toggleAPButton.isChecked());
 
 		if(isAPEnabled) {
+			Server serverSocket = new Server(serverState);
+			serverSocket.execute(0);
 			loadConnectedClients();		
 		}else
 			listConnectedClients.setText("");
@@ -111,7 +112,6 @@ public class ShareActivity extends Activity {
 		
 		ChangeAPState changeApState = new ChangeAPState(this, wifiApManager, isChecked);
 		changeApState.execute(wifiConfig);
-		
 	}
 
 

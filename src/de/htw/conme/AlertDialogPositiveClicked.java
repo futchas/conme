@@ -1,5 +1,5 @@
 /**
- * 
+ *	Copyright (C) 2013 by Iyad Al-Sahwi
  */
 package de.htw.conme;
 

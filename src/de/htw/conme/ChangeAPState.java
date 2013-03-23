@@ -1,9 +1,12 @@
 /**
- * 
+ *	Copyright (C) 2013 by Iyad Al-Sahwi
  */
 package de.htw.conme;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
@@ -39,11 +42,22 @@ public class ChangeAPState extends AsyncTask<WifiConfig, Void, Boolean> {
 		super.onPostExecute(hasStateChanged);
 		
 		if(activity instanceof ShareActivity) {
-			if(!hasStateChanged)
-				Toast.makeText(activity,"You mobile doesn't allow to enable/disable Tethering hotspot/access point!", Toast.LENGTH_LONG).show();
+			if(!hasStateChanged) {
+				AlertDialog.Builder alert = new AlertDialog.Builder(activity);
+		        alert.setTitle("Problem with Tethering!")
+		        	.setMessage("You mobile doesn't allow to enable/disable Tethering!")
+		        	.setNegativeButton("Ok", new OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.cancel();
+						}
+					});
+		        alert.show();
+			}
 			else 
 				((ShareActivity) activity).showConnectedClients(hasStateChanged, isEnabled);
 		} else if(activity instanceof ConnectActivity) {
+			
 			Toast.makeText(activity, "Tethering will be disabled!",Toast.LENGTH_SHORT).show();	
 			((ConnectActivity) activity).onResumeFurther();
 		}

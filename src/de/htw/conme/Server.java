@@ -22,10 +22,10 @@ import android.widget.TextView;
 public class Server extends AsyncTask<Integer, Void, Socket> {
 
 	private ServerSocket serverSocket = null;
-	private TextView textView1;
+	private TextView textView;
 	
-	public Server(TextView textView1) {
-		this.textView1 = textView1;
+	public Server(TextView textView) {
+		this.textView = textView;
 		
 	}
 	
@@ -74,7 +74,7 @@ public class Server extends AsyncTask<Integer, Void, Socket> {
 	        //Log.i("TcpServer", "IP: " + ss.getInetAddress());
 	        //textView1.append("\nIP: " + ss.getInetAddress() + "\n");
 	        Log.i("TcpServer", "Server received: " + incomingMsg);
-	        textView1.append("Server received: " + incomingMsg + "\n");
+	        textView.append("Server received: " + incomingMsg + "\n");
 	        
 	      //send a message
 	        String outgoingMsg = "goodbye " + System.getProperty("line.separator");
@@ -82,7 +82,7 @@ public class Server extends AsyncTask<Integer, Void, Socket> {
 	        out.write(outgoingMsg);
 	        out.flush();
 
-	        textView1.append("Server sent: " + outgoingMsg + "\n");
+	        textView.append("Server sent: " + outgoingMsg + "\n");
 	        Log.i("TcpServer", "sent: " + outgoingMsg);
 	        //SystemClock.sleep(5000);
 	        
