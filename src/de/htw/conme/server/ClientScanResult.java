@@ -1,4 +1,4 @@
-package de.htw.conme;
+package de.htw.conme.server;
 
 public class ClientScanResult {
 	private String IpAddr;

@@ -3,6 +3,9 @@
  */
 package de.htw.conme;
 
+import de.htw.conme.client.ConnectActivity;
+import de.htw.conme.server.ShareActivity;
+import de.htw.conme.server.WifiApManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -14,13 +17,13 @@ import android.widget.Toast;
  * @author Iyad Al-Sahwi
  *
  */
-public class ChangeAPState extends AsyncTask<WifiConfig, Void, Boolean> {
+public class ChangedAPState extends AsyncTask<WifiConfig, Void, Boolean> {
 
 	private WifiApManager wifiApManager;
 	private Activity activity;
 	private boolean isEnabled;
 
-	public ChangeAPState(Activity activity, WifiApManager wifiApManager, Boolean isAPEnabled) {
+	public ChangedAPState(Activity activity, WifiApManager wifiApManager, Boolean isAPEnabled) {
 		this.activity = activity;
 		this.wifiApManager = wifiApManager;
 		this.isEnabled = isAPEnabled;

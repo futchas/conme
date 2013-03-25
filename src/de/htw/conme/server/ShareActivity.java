@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.htw.conme;
+package de.htw.conme.server;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,6 +9,9 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import de.htw.conme.ChangedAPState;
+import de.htw.conme.R;
+import de.htw.conme.WifiConfig;
 
 /**
  * @author Iyad Al-Sahwi
@@ -21,6 +24,7 @@ public class ShareActivity extends Activity {
 	private TextView listConnectedClients;
 	private ToggleButton toggleAPButton;
 	private TextView serverState;
+	private Server serverSocket;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,16 +66,16 @@ public class ShareActivity extends Activity {
 
 
 
-	protected void showConnectedClients(boolean hasAPStateChanged, boolean isAPEnabled) {
+	public void showConnectedClients(boolean hasAPStateChanged, boolean isAPEnabled) {
 		
 		//if AP couldn't be enabled/disabled then toggle back the button
 		if(!hasAPStateChanged) 
 			toggleAPButton.setChecked(!toggleAPButton.isChecked());
 
 		if(isAPEnabled) {
-			Server serverSocket = new Server(serverState);
-			serverSocket.execute(0);
-			loadConnectedClients();		
+			loadConnectedClients();	
+			serverSocket = new Server(serverState);
+			serverSocket.execute(3333);
 		}else
 			listConnectedClients.setText("");
 	}
@@ -110,7 +114,10 @@ public class ShareActivity extends Activity {
 		
 		boolean isChecked = ((ToggleButton) view).isChecked();
 		
-		ChangeAPState changeApState = new ChangeAPState(this, wifiApManager, isChecked);
+		if(!isChecked && serverSocket != null)
+			serverSocket.closeServer();
+		
+		ChangedAPState changeApState = new ChangedAPState(this, wifiApManager, isChecked);
 		changeApState.execute(wifiConfig);
 	}
 

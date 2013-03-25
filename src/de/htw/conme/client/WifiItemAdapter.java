@@ -1,9 +1,13 @@
 /**
  * 
  */
-package de.htw.conme;
+package de.htw.conme.client;
 
 import java.util.List;
+
+import de.htw.conme.R;
+import de.htw.conme.R.id;
+import de.htw.conme.R.layout;
 
 import android.app.Activity;
 import android.net.wifi.ScanResult;

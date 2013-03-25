@@ -1,8 +1,9 @@
 /**
  *	Copyright (C) 2013 by Iyad Al-Sahwi
  */
-package de.htw.conme;
+package de.htw.conme.client;
 
+import de.htw.conme.WifiConfig;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -50,7 +51,6 @@ public class AlertDialogPositiveClicked implements OnClickListener {
 			disconnect();
 		} else {
 			String key = "f409!k23c#d.92" + ssid.substring(5, 15);
-//			String key = "badabum" + ssid.substring(8, 12);
 			WifiConfig wifiConfig = new WifiConfig(ssid, key, false);
 
 			ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

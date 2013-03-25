@@ -1,7 +1,7 @@
 /**
  *	Copyright (C) 2013 by Iyad Al-Sahwi
  */
-package de.htw.conme;
+package de.htw.conme.client;
 
 import java.util.List;
 import java.util.Timer;
@@ -22,6 +22,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
+import de.htw.conme.ChangedAPState;
+import de.htw.conme.R;
+import de.htw.conme.server.WifiApManager;
 
 /**
  * @author Iyad Al-Sahwi
@@ -33,8 +36,8 @@ public class ConnectActivity extends Activity {
 	private BroadcastReceiver receiver;
 	private ListView conMeNetworkList;
 	private ListView otherNetworkList;
-//	private NetChangedReceiver netChangedReceiver;
-	private final int wifiScanInterval = 10000;
+	private NetChangedReceiver netChangedReceiver;
+	private final int WIFI_SCAN_INTERVALS = 10000;
 	private Timer timer;
 	
 	@Override
@@ -50,9 +53,9 @@ public class ConnectActivity extends Activity {
 		if (receiver == null)
 			receiver = new ScanWifiReceiver(wifi);
 		
-//		if (netChangedReceiver == null)
-//			netChangedReceiver = new NetChangedReceiver();
-		
+		if (netChangedReceiver == null)
+			netChangedReceiver = new NetChangedReceiver(wifi);
+				
 //		registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 //		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 		
@@ -87,19 +90,21 @@ public class ConnectActivity extends Activity {
 			unregisterReceiver(receiver);
 		if(timer != null)
 			timer.cancel();
-//		unregisterReceiver(netChangedReceiver);
+		if(netChangedReceiver != null)
+			unregisterReceiver(netChangedReceiver);
 	}
 	
 	public void onResume() {
 		super.onResume();
 		registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 		
 		WifiApManager accessPointManager = new WifiApManager(wifi);
 		
 		//Unfortunately it's not possible to tether and use Wifi simultaneously.
 		//disable access point if it's enabled
 		if(accessPointManager.isWifiApEnabled()) {
-			ChangeAPState changeApState = new ChangeAPState(this, accessPointManager, false);
+			ChangedAPState changeApState = new ChangedAPState(this, accessPointManager, false);
 			changeApState.execute();
 		}else
 			onResumeFurther();
@@ -122,7 +127,7 @@ public class ConnectActivity extends Activity {
 		};
 		
 		//Run Task every configured interval in ms
-		timer.scheduleAtFixedRate(timerTask, 0, wifiScanInterval);
+		timer.scheduleAtFixedRate(timerTask, 0, WIFI_SCAN_INTERVALS);
 	}
 
 	@Override

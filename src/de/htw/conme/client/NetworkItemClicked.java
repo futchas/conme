@@ -1,9 +1,10 @@
 /**
  * 
  */
-package de.htw.conme;
+package de.htw.conme.client;
 
 import java.util.List;
+
 
 import android.app.AlertDialog;
 import android.content.Context;

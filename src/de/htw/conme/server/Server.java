@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.htw.conme;
+package de.htw.conme.server;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,13 +21,24 @@ import android.widget.TextView;
  */
 public class Server extends AsyncTask<Integer, Void, Socket> {
 
-	private ServerSocket serverSocket = null;
+	private ServerSocket serverSocket;
 	private TextView textView;
+	private String incomingMsg;
+	private String outgoingMsg;
 	
 	public Server(TextView textView) {
 		this.textView = textView;
-		
 	}
+	
+	public void closeServer() {
+		try {
+			serverSocket.close();
+		} catch (IOException e) {
+			Log.d("Server", "Closung the server cause problem");
+			e.printStackTrace();
+		}		
+	}
+	
 	
 	@Override
 	protected Socket doInBackground(Integer... params) {
@@ -38,6 +49,18 @@ public class Server extends AsyncTask<Integer, Void, Socket> {
 
 	        //accept connections
 	        Socket socket = serverSocket.accept();
+	        
+	        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+	        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			
+			incomingMsg = in.readLine() + System.getProperty("line.separator");
+	        
+			//send a message
+			outgoingMsg = "goodbye " + System.getProperty("line.separator");
+				
+	        out.write(outgoingMsg);
+	        out.flush();
+			
 	        return socket;
 
 
@@ -65,32 +88,24 @@ public class Server extends AsyncTask<Integer, Void, Socket> {
 	
 	protected void onPostExecute(Socket socket) {
 		
-		try {
+		if(socket != null) {
+			try {
+	
+		        //Log.i("TcpServer", "IP: " + ss.getInetAddress());
+		        //textView1.append("\nIP: " + ss.getInetAddress() + "\n");
+		        Log.i("Server", "Server received: " + incomingMsg);
+		        textView.setText("Server received: " + incomingMsg + "\n");
+		        
+		        textView.append("Server sent: " + outgoingMsg + "\n");
+		        Log.i("Server", "Server sent: " + outgoingMsg);
+		        
+		        socket.close();
 			
-			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			String incomingMsg = in.readLine() + System.getProperty("line.separator");
-
-	        //Log.i("TcpServer", "IP: " + ss.getInetAddress());
-	        //textView1.append("\nIP: " + ss.getInetAddress() + "\n");
-	        Log.i("TcpServer", "Server received: " + incomingMsg);
-	        textView.append("Server received: " + incomingMsg + "\n");
-	        
-	      //send a message
-	        String outgoingMsg = "goodbye " + System.getProperty("line.separator");
-
-	        out.write(outgoingMsg);
-	        out.flush();
-
-	        textView.append("Server sent: " + outgoingMsg + "\n");
-	        Log.i("TcpServer", "sent: " + outgoingMsg);
-	        //SystemClock.sleep(5000);
-	        
-	        socket.close();
-		
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
         
 

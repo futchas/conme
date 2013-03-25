@@ -1,4 +1,4 @@
-package de.htw.conme;
+package de.htw.conme.client;
 
 import java.util.ArrayList;
 import java.util.List;

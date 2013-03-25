@@ -1,9 +1,10 @@
 /**
  * 
  */
-package de.htw.conme;
+package de.htw.conme.server;
 
 import java.util.ArrayList;
+
 
 import android.os.AsyncTask;
 import android.widget.TextView;

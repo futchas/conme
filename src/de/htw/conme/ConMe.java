@@ -3,6 +3,8 @@
  */
 package de.htw.conme;
 
+import de.htw.conme.client.ConnectActivity;
+import de.htw.conme.server.ShareActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
