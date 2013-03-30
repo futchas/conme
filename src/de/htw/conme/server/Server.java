@@ -8,62 +8,87 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import android.app.Activity;
 import android.os.AsyncTask;
+import android.provider.Settings.Secure;
 import android.util.Log;
-import android.widget.TextView;
+import de.htw.conme.ConMe;
+import de.htw.conme.ConnectionInfo;
 
 /**
- * @author Iyad Al-sahwi
+ * @author Iyad Al-Sahwi
  *
  */
-public class Server extends AsyncTask<Integer, Void, Socket> {
+public class Server extends AsyncTask<Integer, Void, Void> {
 
 	private ServerSocket serverSocket;
-	private TextView textView;
 	private String incomingMsg;
 	private String outgoingMsg;
+	private boolean isListeningToClients;
+	private String androidID;
+	public static final int PORT = 3333; 
 	
-	public Server(TextView textView) {
-		this.textView = textView;
+	public Server(String androidID) {
+		this.androidID = androidID;
+		isListeningToClients = true;
 	}
 	
+	
+	public void setListeningToClients(boolean isListeningToClients) {
+		this.isListeningToClients = isListeningToClients;
+	}
+
+
 	public void closeServer() {
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
-			Log.d("Server", "Closung the server cause problem");
+			Log.d("Server", "Closung the server caused a problem");
 			e.printStackTrace();
 		}		
 	}
 	
 	
 	@Override
-	protected Socket doInBackground(Integer... params) {
+	protected Void doInBackground(Integer... params) {
 
 	    try {
-	        serverSocket = new ServerSocket(params[0]);	      
+	        serverSocket = new ServerSocket(PORT);	      
 	        //ss.setSoTimeout(10000);
 
-	        //accept connections
-	        Socket socket = serverSocket.accept();
-	        
-	        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-	        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			
-			incomingMsg = in.readLine() + System.getProperty("line.separator");
-	        
-			//send a message
-			outgoingMsg = "goodbye " + System.getProperty("line.separator");
+	        while (true) {
+	        	
+		        //accept connections
+	        	Socket socket = serverSocket.accept();
+		        
+//		        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+//		        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//				incomingMsg = in.readLine() + System.getProperty("line.separator");
+//				String androidID = Secure.getString(activity.getContentResolver(), Secure.ANDROID_ID); 
+//		    	send a message
+//				outgoingMsg = "You are connected to " + androidID + System.getProperty("line.separator");
+//		        out.write(outgoingMsg);
+//		        out.flush();
+
+	        	ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
+	        	ConnectionInfo conInfoIn = (ConnectionInfo) objectIn.readObject();
+	        	incomingMsg = conInfoIn.toString();
 				
-	        out.write(outgoingMsg);
-	        out.flush();
+				ConnectionInfo conInfoOut = new ConnectionInfo(androidID);
+				ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
+		    	objectOut.writeObject(conInfoOut);  
+		    	outgoingMsg = conInfoOut.toString(); 
+		        
+		        Log.i("Server", "Server received: " + incomingMsg);
+		        Log.i("Server", "Server sent: " + outgoingMsg);
+	        }
 			
-	        return socket;
-
-
 	    } catch (InterruptedIOException e) {
 	        //if timeout occurs
 	        e.printStackTrace();
@@ -71,45 +96,21 @@ public class Server extends AsyncTask<Integer, Void, Socket> {
 	    } catch (IOException e) {
 	        e.printStackTrace();
 
-	    } finally {
-	        if (serverSocket != null) {
-	            try {
-	                serverSocket.close();
-	            } catch (IOException e) {
-	                e.printStackTrace();
-	            }
-	        }
-	    }
-//	    publishProgress(values)
+	    } 
+	    catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+//	    finally {
+//        if (serverSocket != null) {
+//            try {
+//                serverSocket.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 	    
 		return null;
 	}
-	
-	
-	protected void onPostExecute(Socket socket) {
-		
-		if(socket != null) {
-			try {
-	
-		        //Log.i("TcpServer", "IP: " + ss.getInetAddress());
-		        //textView1.append("\nIP: " + ss.getInetAddress() + "\n");
-		        Log.i("Server", "Server received: " + incomingMsg);
-		        textView.setText("Server received: " + incomingMsg + "\n");
-		        
-		        textView.append("Server sent: " + outgoingMsg + "\n");
-		        Log.i("Server", "Server sent: " + outgoingMsg);
-		        
-		        socket.close();
-			
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		}
-        
-
-    }
-
 
 }

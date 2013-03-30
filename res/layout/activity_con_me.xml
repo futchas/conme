@@ -13,7 +13,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         android:gravity="center"
-        android:text="@string/app_description"
+        android:text="Some text here"
         android:textAppearance="?android:attr/textAppearanceMedium" />
     
     <Button

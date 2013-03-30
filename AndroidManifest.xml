@@ -34,6 +34,9 @@
             android:name="de.htw.conme.client.ConnectActivity"
             android:label="@string/title_activity_connect" >
         </activity>
+        <service
+	        android:name="de.htw.conme.server.ServerService">
+    	</service>
     </application>
 
 </manifest>

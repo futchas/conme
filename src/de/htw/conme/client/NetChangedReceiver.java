@@ -8,8 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.provider.Settings.Secure;
+import de.htw.conme.server.Server;
+import de.htw.conme.server.ShareActivity;
 
 /**
  * @author Iyad Al-Sahwi
@@ -18,10 +20,8 @@ import android.net.wifi.WifiManager;
 public class NetChangedReceiver extends BroadcastReceiver {
 
 	private WifiManager wifi;
+	private Client client;
 
-	/**
-	 * 
-	 */
 	public NetChangedReceiver(WifiManager wifi) {
 		this.wifi = wifi;
 	}
@@ -34,15 +34,13 @@ public class NetChangedReceiver extends BroadcastReceiver {
 		
 		NetworkInfo netInfo = (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
         if (netInfo.getState() == State.CONNECTED) {
-        	WifiInfo wifiInfo = wifi.getConnectionInfo();
-        	String ssid = wifiInfo.getSSID();
+        	String ssid = wifi.getConnectionInfo().getSSID();
         	if (ssid.startsWith("WLAN-")) {
-        		Client client = new Client(context, wifi);
-        		client.execute(3333);
+        		client = new Client(context, wifi);
+        		client.execute(Server.PORT);
         	}
+        } else if (netInfo.getState() == State.DISCONNECTED && client != null) {
+        	client.setConnected(false);
         }
-//          notifyWifiState();
-
 	}
-
 }

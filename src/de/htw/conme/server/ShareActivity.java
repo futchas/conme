@@ -5,11 +5,13 @@ package de.htw.conme.server;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.provider.Settings.Secure;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import de.htw.conme.ChangedAPState;
+import de.htw.conme.ConMe;
 import de.htw.conme.R;
 import de.htw.conme.WifiConfig;
 
@@ -24,7 +26,9 @@ public class ShareActivity extends Activity {
 	private TextView listConnectedClients;
 	private ToggleButton toggleAPButton;
 	private TextView serverState;
+	private String ssid;
 	private Server serverSocket;
+	public static final String NETWORK_BRANDING = "WLAN-"; 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +45,7 @@ public class ShareActivity extends Activity {
 		//SSID = "WLAN-" + uniqueNumber
 		//KEY = encrypt(uniqueNumber);
 		
-		String ssid = "WLAN-T3XH7UW2B5";
+		ssid = NETWORK_BRANDING + "T3XH7UW2B5";
 		String key = "f409!k23c#d.92" + ssid.substring(5, 15);
 		wifiConfig = new WifiConfig(ssid, key, true);
 	}
@@ -73,14 +77,21 @@ public class ShareActivity extends Activity {
 			toggleAPButton.setChecked(!toggleAPButton.isChecked());
 
 		if(isAPEnabled) {
-			loadConnectedClients();	
-			serverSocket = new Server(serverState);
-			serverSocket.execute(3333);
+			loadConnectedClients();
+//			ServerService service = new ServerService(this, serverState);
+//			ServerAsyncTask serverSocket = new ServerAsyncTask(ssid);
+			
+//			Intent intent = new Intent(this, ServerService.class);
+//			startService(intent);
+			
+			String androidID = Secure.getString(getContentResolver(), Secure.ANDROID_ID); 
+			serverSocket = new Server(androidID);
+			serverSocket.execute(Server.PORT);
 		}else
+			serverSocket = null;
 			listConnectedClients.setText("");
+//			serverSocket.setListeningToClients(false);
 	}
-
-
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -93,7 +104,6 @@ public class ShareActivity extends Activity {
 		
 		ClientListTask clientIPTask = new ClientListTask(wifiApManager, listConnectedClients);
 		clientIPTask.execute();
-		
 		
 //		textView1.append("gateway: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().gateway) + "\n");
 //		textView1.append("dns1: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().dns1) + "\n");
@@ -114,8 +124,8 @@ public class ShareActivity extends Activity {
 		
 		boolean isChecked = ((ToggleButton) view).isChecked();
 		
-		if(!isChecked && serverSocket != null)
-			serverSocket.closeServer();
+//		if(!isChecked && serverSocket != null)
+//			serverSocket.closeServer();
 		
 		ChangedAPState changeApState = new ChangedAPState(this, wifiApManager, isChecked);
 		changeApState.execute(wifiConfig);
