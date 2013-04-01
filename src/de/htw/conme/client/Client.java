@@ -3,15 +3,14 @@
  */
 package de.htw.conme.client;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.StreamCorruptedException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.content.Context;
 import android.net.TrafficStats;
@@ -20,7 +19,6 @@ import android.os.AsyncTask;
 import android.provider.Settings.Secure;
 import android.util.Log;
 import android.widget.Toast;
-import de.htw.conme.ConMe;
 import de.htw.conme.ConnectionInfo;
 import de.htw.conme.server.Server;
 
@@ -32,34 +30,31 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 
 	private WifiManager wifi;
 	private Context context;	
+	private ConnectionInfo serverConInfo;
+	private ConnectionInfo clientConInfo;
 	private String incomingMsg;
 	private String outgoingMsg;
 	private boolean isConnected;
 	private long startReceivedData;
 	private long startTransmittedData;
 	private String androidID;
+	public static final int SENDING_INTERVAL = 10000; //in ms 
 	
 	public Client(Context context, WifiManager wifiManager) {
 		isConnected = true;
 		this.context = context;
 		this.wifi = wifiManager;
-		startReceivedData = TrafficStats.getTotalRxBytes();
 		startTransmittedData = TrafficStats.getTotalTxBytes();
+		startReceivedData = TrafficStats.getTotalRxBytes();
 		androidID = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
 	}
 	
-	
-//	public void closeConnection() {
-//		try {
-//			socket.close();
-//		} catch (IOException e) {
-//			Log.d("Client", "Closung the client connection cause problem");
-//			e.printStackTrace();
-//		}		
-//	}
-	
 	public void setConnected(boolean isConnected) {
 		this.isConnected = isConnected;
+	}
+	
+	public boolean isConnected() {
+		return isConnected;
 	}
 
 
@@ -71,7 +66,7 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 //	    	ip = getLocalIpAddress();
 //	    	InetAddress ip2 =InetAddress.getByName(gateway);
 	    	String gateway = intToIp(wifi.getDhcpInfo().gateway);
-	    	Socket socket = new Socket(gateway, Server.PORT);
+	    	final Socket socket = new Socket(gateway, Server.PORT);
 	    	
 //	    	BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 //	    	BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -88,16 +83,35 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 	    	String mac = wifi.getConnectionInfo().getMacAddress();
 	    	String ipAdress = intToIp(wifi.getConnectionInfo().getIpAddress());
 			
-	    	ConnectionInfo conInfoOut = new ConnectionInfo(androidID, startTransmittedData, startReceivedData);
-			ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
-	    	objectOut.writeObject(conInfoOut);  
-	    	outgoingMsg = conInfoOut.toString(); 
+	    	initSend(socket);
+	    	initReceive(socket);
+	    	
+	    	Timer timer = new Timer();
 			
-	    	ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
-	    	ConnectionInfo conInfoIn = (ConnectionInfo) objectIn.readObject();
-	    	incomingMsg = conInfoIn.toString();
-            	
-	        return socket;
+			TimerTask timerTask = new TimerTask() {
+				public void run() {
+					try {
+						send(socket);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			
+			timer.scheduleAtFixedRate(timerTask, SENDING_INTERVAL, SENDING_INTERVAL);
+	    	
+//	    	receive();
+	    	
+//	    	ConnectionInfo conInfoOut = new ConnectionInfo(androidID, startTransmittedData, startReceivedData);
+//			ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
+//	    	objectOut.writeObject(conInfoOut);  
+//	    	outgoingMsg = conInfoOut.toString(); 
+//			
+//	    	ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
+//	    	ConnectionInfo conInfoIn = (ConnectionInfo) objectIn.readObject();
+//	    	incomingMsg = conInfoIn.toString();
+
+	    	return socket;
 	
 	    } catch (UnknownHostException e) {
 	        e.printStackTrace();
@@ -109,8 +123,35 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 	    
 		return null; 
 	}
+
+	private void initSend(Socket socket) throws IOException {
+
+    	clientConInfo = new ConnectionInfo(androidID, startTransmittedData, startReceivedData);
+		ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
+    	objectOut.writeObject(clientConInfo);
+    	outgoingMsg = clientConInfo.toString(); 
+	}
 	
-	
+	private void initReceive(Socket socket) throws StreamCorruptedException, IOException, ClassNotFoundException {
+
+    	ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
+    	serverConInfo = (ConnectionInfo) objectIn.readObject();
+    	incomingMsg = serverConInfo.toString();
+	}
+
+	private void send(Socket socket) throws IOException {
+		Log.i("Client", "Send request from Client to Server");
+		
+		long currentTransmittedData = TrafficStats.getTotalTxBytes();
+		long currentReceivedData = TrafficStats.getTotalRxBytes();
+		
+//		clientConInfo = new ConnectionInfo(androidID, startTransmittedData, startReceivedData);
+		clientConInfo.setTotalDataUsage(currentTransmittedData, currentReceivedData);
+		
+		ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());
+    	objectOut.writeObject(clientConInfo);
+	}
+
 	public String intToIp(int addr) {
 	    return  ((addr & 0xFF) + "." + 
 	            ((addr >>>= 8) & 0xFF) + "." + 

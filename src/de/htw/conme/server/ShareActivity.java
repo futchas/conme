@@ -4,6 +4,7 @@
 package de.htw.conme.server;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.view.Menu;
@@ -25,9 +26,8 @@ public class ShareActivity extends Activity {
 	private WifiApManager wifiApManager;
 	private TextView listConnectedClients;
 	private ToggleButton toggleAPButton;
-	private TextView serverState;
+	private Intent serverIntent;
 	private String ssid;
-	private Server serverSocket;
 	public static final String NETWORK_BRANDING = "WLAN-"; 
 	
 	@Override
@@ -36,7 +36,6 @@ public class ShareActivity extends Activity {
 		setContentView(R.layout.activity_share);
 		
 		listConnectedClients = (TextView) findViewById(R.id.listConnectedClients);
-		serverState = (TextView) findViewById(R.id.serverState);
 		toggleAPButton = (ToggleButton) findViewById(R.id.toggleAP);
 		
 		wifiApManager = new WifiApManager(this);
@@ -75,22 +74,21 @@ public class ShareActivity extends Activity {
 		//if AP couldn't be enabled/disabled then toggle back the button
 		if(!hasAPStateChanged) 
 			toggleAPButton.setChecked(!toggleAPButton.isChecked());
-
-		if(isAPEnabled) {
-			loadConnectedClients();
-//			ServerService service = new ServerService(this, serverState);
-//			ServerAsyncTask serverSocket = new ServerAsyncTask(ssid);
-			
-//			Intent intent = new Intent(this, ServerService.class);
-//			startService(intent);
-			
-			String androidID = Secure.getString(getContentResolver(), Secure.ANDROID_ID); 
-			serverSocket = new Server(androidID);
-			serverSocket.execute(Server.PORT);
-		}else
-			serverSocket = null;
-			listConnectedClients.setText("");
-//			serverSocket.setListeningToClients(false);
+		else {
+			if(isAPEnabled) {
+				loadConnectedClients();
+				
+				String androidID = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
+				
+				serverIntent = new Intent(this, ServerService.class);
+				serverIntent.putExtra("androidID", androidID);
+				startService(serverIntent);
+				
+			}else if(serverIntent != null){
+				stopService(serverIntent);
+				listConnectedClients.setText("");
+			}
+		}
 	}
 
 	@Override

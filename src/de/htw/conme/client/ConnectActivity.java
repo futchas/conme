@@ -54,7 +54,7 @@ public class ConnectActivity extends Activity {
 			receiver = new ScanWifiReceiver(wifi);
 		
 		if (netChangedReceiver == null)
-			netChangedReceiver = new NetChangedReceiver(wifi);
+			netChangedReceiver = new NetChangedReceiver(this, wifi);
 				
 //		registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 //		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
