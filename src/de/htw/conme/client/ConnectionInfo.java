@@ -7,6 +7,8 @@ import java.io.Serializable;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -48,6 +50,11 @@ public class ConnectionInfo implements Serializable{
 
 	public String getDevice() {
 		return device;
+	}
+	
+	public String getStringDate() {
+		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd-MM-yyyy");
+		return dtf.print(startDate);
 	}
 	
 	private void setDuration(DateTime endDate) {

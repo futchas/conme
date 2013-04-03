@@ -48,10 +48,12 @@
 	    <TableRow
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:padding="5dip"
 	        android:gravity="left" >
 	        <TextView
 	            android:text="Device"
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	        <TextView
+	            android:text="Connection Date"
 	            android:textAppearance="?android:attr/textAppearanceMedium" />
 	        <TextView
 	            android:text="Duration"

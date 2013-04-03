@@ -4,6 +4,10 @@
 package de.htw.conme.server;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -71,6 +75,9 @@ public class ClientListUpdater extends BroadcastReceiver {
 		TextView device = (TextView) row.findViewById(R.id.device_cell);
 	    device.setText(conInfo.getDevice());
 	    
+	    TextView date = (TextView) row.findViewById(R.id.date_cell);
+	    date.setText(conInfo.getStringDate());
+
 	    TextView duration = (TextView) row.findViewById(R.id.duration_cell);
 	    duration.setText(conInfo.getDuration());
 	    
@@ -82,11 +89,14 @@ public class ClientListUpdater extends BroadcastReceiver {
 		
 		TableRow row = new TableRow(context);
 	    row.setGravity(Gravity.CENTER);
-	    row.setPadding(5, 5, 5, 5);
-	    
+
 	    TextView device = new TextView(context);
 	    device.setText(conInfo.getDevice());
 	    device.setId(R.id.device_cell);
+	    
+	    TextView date = new TextView(context);
+	    date.setText(conInfo.getStringDate());
+	    date.setId(R.id.date_cell);
 	    
 	    TextView duration = new TextView(context);
 	    duration.setText(conInfo.getDuration());
@@ -97,6 +107,7 @@ public class ClientListUpdater extends BroadcastReceiver {
 	    dataUsage.setId(R.id.data_usage_cell);
 	    
 	    row.addView(device);
+	    row.addView(date);
 	    row.addView(duration);
 	    row.addView(dataUsage);
 	    table.addView(row);

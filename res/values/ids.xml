@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item type="id" name="device_cell" />
+    <item type="id" name="date_cell" />
     <item type="id" name="duration_cell" />
     <item type="id" name="data_usage_cell" />
 </resources>
