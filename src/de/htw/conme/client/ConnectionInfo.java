@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.htw.conme;
+package de.htw.conme.client;
 
 import java.io.Serializable;
 
@@ -27,49 +27,53 @@ public class ConnectionInfo implements Serializable{
 	private long receivedData;
 	private long transmittedData;
 	private long totalDataUsage;
+	private String device;
 	
-
-	public ConnectionInfo(String id) {
+	public ConnectionInfo(String id, String device, long startTransmittedData, long startReceivedData) {
 		this.id = id;
-		this.startDate = new DateTime();
-//		this.totalDataUsage = transmittedData + receivedData;
-	}
-	
-	public ConnectionInfo(String id, long startTransmittedData, long startReceivedData) {
-		this.id = id;
+		this.device = device;
 		this.startDate = new DateTime();
 		this.startTransmittedData = startTransmittedData;
 		this.startReceivedData = startReceivedData;
+		this.transmittedData = startTransmittedData;
+		this.receivedData = startReceivedData;
 		this.startTotalDataUsage = startTransmittedData + startReceivedData;
-		
+		this.totalDataUsage= startTotalDataUsage; 
 	}
-
 
 	public String getId() {
 		return id;
 	}
 
 
+	public String getDevice() {
+		return device;
+	}
+	
+	private void setDuration(DateTime endDate) {
+		if(startDate != null && endDate != null) {
+			Period period = new Period(startDate, endDate);
+			
+			PeriodFormatter formatter = new PeriodFormatterBuilder()
+			.printZeroAlways()
+	        .minimumPrintedDigits(2)
+	        .appendHours()
+	        .appendSeparator(":")
+	        .printZeroAlways()
+	        .minimumPrintedDigits(2)
+	        .appendMinutes()
+	        .appendSeparator(":")
+	        .printZeroAlways()
+	        .minimumPrintedDigits(2)
+	        .appendSeconds()
+	        .toFormatter();
+			 
+			this.duration = formatter.print(period);
+		} else
+			this.duration = "00:00:00";
+	}
+
 	public String getDuration() {
-		
-		endDate = new DateTime();
-		Period period = new Period(startDate, endDate);
-		
-		PeriodFormatter formatter = new PeriodFormatterBuilder()
-		.printZeroAlways()
-        .minimumPrintedDigits(2)
-        .appendHours()
-        .appendSeparator(":")
-        .printZeroAlways()
-        .minimumPrintedDigits(2)
-        .appendMinutes()
-        .appendSeparator(":")
-        .printZeroAlways()
-        .minimumPrintedDigits(2)
-        .appendSeconds()
-        .toFormatter();
-		 
-		duration = formatter.print(period);
 		return duration;
 	}
 
@@ -85,18 +89,24 @@ public class ConnectionInfo implements Serializable{
 	
 	public void setEndDate(DateTime endDate) {
 		this.endDate = endDate;
+		setDuration(endDate);
 	}
 
+//	public void setStartDate(DateTime startDate) {
+//		this.startDate = startDate;
+//	}
 
 	public long getTotalDataUsage() {
-		return totalDataUsage;
+		return totalDataUsage - startTotalDataUsage;
 	}
 
 	public long getTotalDataUsageInMB() {
-		return totalDataUsage / 1024 / 1024;
+		return getTotalDataUsage() / 1024 / 1024;
 	}
 
 	public void setTotalDataUsage(long transmitted, long received) {
+		this.transmittedData = transmitted;
+		this.receivedData = received;
 		this.totalDataUsage = received + transmitted;
 	}
 

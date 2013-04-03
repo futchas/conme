@@ -28,10 +28,12 @@
         </activity>
         <activity
             android:name="de.htw.conme.server.ShareActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_share" >
         </activity>
         <activity
             android:name="de.htw.conme.client.ConnectActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_connect" >
         </activity>
         <service

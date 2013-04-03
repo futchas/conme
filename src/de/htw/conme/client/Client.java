@@ -3,24 +3,28 @@
  */
 package de.htw.conme.client;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.joda.time.DateTime;
 
 import android.content.Context;
 import android.net.TrafficStats;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.Settings.Secure;
 import android.util.Log;
 import android.widget.Toast;
-import de.htw.conme.ConnectionInfo;
-import de.htw.conme.server.Server;
+import de.htw.conme.server.ServerService;
 
 /**
  * @author Iyad Al-Sahwi
@@ -30,7 +34,6 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 
 	private WifiManager wifi;
 	private Context context;	
-	private ConnectionInfo serverConInfo;
 	private ConnectionInfo clientConInfo;
 	private String incomingMsg;
 	private String outgoingMsg;
@@ -38,6 +41,7 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 	private long startReceivedData;
 	private long startTransmittedData;
 	private String androidID;
+	private Socket socket;
 	public static final int SENDING_INTERVAL = 10000; //in ms 
 	
 	public Client(Context context, WifiManager wifiManager) {
@@ -65,33 +69,32 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 //	    	InetAddress ip2 =InetAddress.getByName("Blablub");
 //	    	ip = getLocalIpAddress();
 //	    	InetAddress ip2 =InetAddress.getByName(gateway);
+	    	
+//	    	String mac = wifi.getConnectionInfo().getMacAddress();
+//	    	String ipAdress = intToIp(wifi.getConnectionInfo().getIpAddress());
+	    	
 	    	String gateway = intToIp(wifi.getDhcpInfo().gateway);
-	    	final Socket socket = new Socket(gateway, Server.PORT);
-	    	
-//	    	BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//	    	BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-//	    	outMsg = "Android " + androidID + ", IP: " + ipAdress +", Mac: "+ mac + " is connecting!" + System.getProperty("line.separator"); 
-//	    	out.write(outMsg);
-//			out.flush();
-			//accept server response
-//			inMsg = in.readLine() + System.getProperty("line.separator");
+	    	socket = new Socket(gateway, ServerService.PORT);
 
+	    	String manufacturer = Build.MANUFACTURER;
+	    	clientConInfo = new ConnectionInfo(androidID, manufacturer, startTransmittedData, startReceivedData);
+			ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
+	    	objectOut.writeObject(clientConInfo);
+	    	outgoingMsg = clientConInfo.toString(); 
 	    	
-//			long receivedData = TrafficStats.getTotalRxBytes();
-//			long transmittedData = TrafficStats.getTotalTxBytes();
-            
-	    	String mac = wifi.getConnectionInfo().getMacAddress();
-	    	String ipAdress = intToIp(wifi.getConnectionInfo().getIpAddress());
+	    	BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			incomingMsg = in.readLine() + System.getProperty("line.separator");
 			
-	    	initSend(socket);
-	    	initReceive(socket);
+			Log.i("Client", "Received from Server: " + incomingMsg);
+			
+	    	socket.setSoTimeout(30000);
 	    	
 	    	Timer timer = new Timer();
 			
 			TimerTask timerTask = new TimerTask() {
 				public void run() {
 					try {
-						send(socket);
+						send();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -99,8 +102,6 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 			};
 			
 			timer.scheduleAtFixedRate(timerTask, SENDING_INTERVAL, SENDING_INTERVAL);
-	    	
-//	    	receive();
 	    	
 //	    	ConnectionInfo conInfoOut = new ConnectionInfo(androidID, startTransmittedData, startReceivedData);
 //			ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
@@ -113,43 +114,29 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 
 	    	return socket;
 	
+	    } catch(SocketTimeoutException e) {
+	        Log.e("Client", "CLIENT SOCKET TIMEOUT!", e);
+	        e.printStackTrace();
 	    } catch (UnknownHostException e) {
 	        e.printStackTrace();
 	    } catch (IOException e) {
 	        e.printStackTrace();
-	    } catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+	    }
 	    
 		return null; 
 	}
 
-	private void initSend(Socket socket) throws IOException {
-
-    	clientConInfo = new ConnectionInfo(androidID, startTransmittedData, startReceivedData);
-		ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
-    	objectOut.writeObject(clientConInfo);
-    	outgoingMsg = clientConInfo.toString(); 
-	}
-	
-	private void initReceive(Socket socket) throws StreamCorruptedException, IOException, ClassNotFoundException {
-
-    	ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
-    	serverConInfo = (ConnectionInfo) objectIn.readObject();
-    	incomingMsg = serverConInfo.toString();
-	}
-
-	private void send(Socket socket) throws IOException {
-		Log.i("Client", "Send request from Client to Server");
+	private void send() throws IOException {
 		
 		long currentTransmittedData = TrafficStats.getTotalTxBytes();
 		long currentReceivedData = TrafficStats.getTotalRxBytes();
 		
-//		clientConInfo = new ConnectionInfo(androidID, startTransmittedData, startReceivedData);
 		clientConInfo.setTotalDataUsage(currentTransmittedData, currentReceivedData);
+		clientConInfo.setEndDate(new DateTime());
 		
 		ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());
     	objectOut.writeObject(clientConInfo);
+    	Log.i("Client", "Send from Client to Server: " + clientConInfo.toString());
 	}
 
 	public String intToIp(int addr) {

@@ -3,19 +3,23 @@
  */
 package de.htw.conme.server;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StreamCorruptedException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+import org.joda.time.DateTime;
+
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
-import de.htw.conme.ConnectionInfo;
+import de.htw.conme.client.ConnectionInfo;
 
 /**
  * @author Iyad Al-Sahwi
@@ -26,7 +30,7 @@ public class ServerService extends IntentService {
 	private ServerSocket serverSocket;
 	private String incomingMsg;
 	private String outgoingMsg;
-	private String androidID;
+//	private String androidID;
 	public static final int PORT = 3333; 
 	
 	public ServerService() {
@@ -38,8 +42,9 @@ public class ServerService extends IntentService {
 	 */
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		androidID = intent.getStringExtra("androidID");
-			    
+		
+//		androidID = intent.getStringExtra("androidID");
+		
 		try {
 	        serverSocket = new ServerSocket(PORT);	      
 
@@ -50,14 +55,21 @@ public class ServerService extends IntentService {
 	        	ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
 	        	ConnectionInfo clientConInfo = (ConnectionInfo) objectIn.readObject();
 	        	incomingMsg = clientConInfo.toString();
-				
-				ConnectionInfo serverConInfo = new ConnectionInfo(androidID);
-				ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
-		    	objectOut.writeObject(serverConInfo);  
-		    	outgoingMsg = serverConInfo.toString();
+	    		
+	        	String manufacturer = Build.MANUFACTURER;
+		        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+		        out.write(manufacturer + System.getProperty("line.separator"));
+		        out.flush();
+		        
+		        startClientListUpdater("init", clientConInfo);
+	        	
+//				ConnectionInfo serverConInfo = new ConnectionInfo(androidID);
+//				ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
+//		    	objectOut.writeObject(serverConInfo);  
+//		    	outgoingMsg = serverConInfo.toString();
 		    	
 		    	Log.i("Server", "Server received: " + incomingMsg);
-		        Log.i("Server", "Server sent: " + outgoingMsg);
+		        Log.i("Server", "Server sent: " + manufacturer);
 		    	
 		        socket.setSoTimeout(30000);
 		        
@@ -79,13 +91,18 @@ public class ServerService extends IntentService {
 		} 
 	}
 
-	private void processCurrentClient(Socket socket, ConnectionInfo initClientConInfo) throws StreamCorruptedException, IOException, ClassNotFoundException {
+	private void startClientListUpdater(String state, ConnectionInfo clientConInfo) {
+		Intent clientListIntent = new Intent("de.htw.conme.UPDATE_CLIENT_LIST");
+    	clientListIntent.putExtra(state, clientConInfo);
+		getApplicationContext().sendBroadcast(clientListIntent);
+	}
+
+	private void processCurrentClient(Socket socket, ConnectionInfo previousClientConInfo) throws StreamCorruptedException, IOException, ClassNotFoundException {
     	
 		ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
 		ConnectionInfo clientConInfo = (ConnectionInfo) objectIn.readObject();
-		
-//		if(initClientConInfo.getId() == clientConInfo.getId())
-			//add to connectedClient list
+//		clientConInfo.setEndDate(new DateTime());
+		startClientListUpdater("refresh", clientConInfo);
 			
     	Log.i("Server", "Current Client Info " + clientConInfo);
 	}

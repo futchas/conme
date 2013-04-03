@@ -5,6 +5,8 @@ package de.htw.conme.server;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.view.Menu;
@@ -12,9 +14,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import de.htw.conme.ChangedAPState;
-import de.htw.conme.ConMe;
 import de.htw.conme.R;
 import de.htw.conme.WifiConfig;
+import de.htw.conme.client.NetChangedReceiver;
 
 /**
  * @author Iyad Al-Sahwi
@@ -28,6 +30,8 @@ public class ShareActivity extends Activity {
 	private ToggleButton toggleAPButton;
 	private Intent serverIntent;
 	private String ssid;
+	private ClientListUpdater clientListUpdater;
+	private boolean isServiceRunning;
 	public static final String NETWORK_BRANDING = "WLAN-"; 
 	
 	@Override
@@ -47,6 +51,11 @@ public class ShareActivity extends Activity {
 		ssid = NETWORK_BRANDING + "T3XH7UW2B5";
 		String key = "f409!k23c#d.92" + ssid.substring(5, 15);
 		wifiConfig = new WifiConfig(ssid, key, true);
+		
+		if (clientListUpdater == null)
+			clientListUpdater = new ClientListUpdater(this);
+		
+		isServiceRunning = false;
 	}
 	
 
@@ -76,16 +85,22 @@ public class ShareActivity extends Activity {
 			toggleAPButton.setChecked(!toggleAPButton.isChecked());
 		else {
 			if(isAPEnabled) {
-				loadConnectedClients();
+				
+				registerReceiver(clientListUpdater, new IntentFilter("de.htw.conme.UPDATE_CLIENT_LIST"));
+				
+//				loadConnectedClients();
 				
 				String androidID = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
 				
 				serverIntent = new Intent(this, ServerService.class);
 				serverIntent.putExtra("androidID", androidID);
 				startService(serverIntent);
+				isServiceRunning = true;
 				
-			}else if(serverIntent != null){
+			}else if(isServiceRunning){
+				unregisterReceiver(clientListUpdater);
 				stopService(serverIntent);
+				isServiceRunning = false;
 				listConnectedClients.setText("");
 			}
 		}

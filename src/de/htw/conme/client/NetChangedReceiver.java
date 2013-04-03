@@ -9,9 +9,7 @@ import android.content.Intent;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
-import android.provider.Settings.Secure;
-import de.htw.conme.server.Server;
+import de.htw.conme.server.ServerService;
 import de.htw.conme.server.ShareActivity;
 
 /**
@@ -41,7 +39,7 @@ public class NetChangedReceiver extends BroadcastReceiver {
         		if(!client.isConnected()){
 //    			if(client.getStatus() != AsyncTask.Status.RUNNING || client == null){
         			client.setConnected(true);
-        			client.execute(Server.PORT);
+        			client.execute(ServerService.PORT);
         		}
         	}
         } else if (netInfo.getState() == State.DISCONNECTED) {

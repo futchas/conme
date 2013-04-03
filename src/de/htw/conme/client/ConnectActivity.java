@@ -53,12 +53,10 @@ public class ConnectActivity extends Activity {
 		if (receiver == null)
 			receiver = new ScanWifiReceiver(wifi);
 		
-		if (netChangedReceiver == null)
+		if (netChangedReceiver == null) {
 			netChangedReceiver = new NetChangedReceiver(this, wifi);
-				
-//		registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-//		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
-		
+			registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+		}
 	}
 	
 	public void showNetworksInList(List<ScanResult> conMeNetworks, List<ScanResult> otherNetworks){
@@ -84,20 +82,19 @@ public class ConnectActivity extends Activity {
 	}
 
 	
-	public void onPause() {
+	protected void onPause() {
 		super.onPause();
+
 		if(receiver != null)
 			unregisterReceiver(receiver);
 		if(timer != null)
 			timer.cancel();
-		if(netChangedReceiver != null)
-			unregisterReceiver(netChangedReceiver);
 	}
 	
-	public void onResume() {
+	protected void onResume() {
 		super.onResume();
+		
 		registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-		registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 		
 		WifiApManager accessPointManager = new WifiApManager(wifi);
 		
@@ -137,5 +134,15 @@ public class ConnectActivity extends Activity {
 		return true;
 	}
 
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		if(netChangedReceiver != null)
+			unregisterReceiver(netChangedReceiver);
+	}
+
+	
+	
 
 }
