@@ -17,13 +17,13 @@ import android.widget.Toast;
  * @author Iyad Al-Sahwi
  *
  */
-public class ChangedAPState extends AsyncTask<WifiConfig, Void, Boolean> {
+public class ChangeAPState extends AsyncTask<WifiConfig, Void, Boolean> {
 
 	private WifiApManager wifiApManager;
 	private Activity activity;
 	private boolean isEnabled;
 
-	public ChangedAPState(Activity activity, WifiApManager wifiApManager, Boolean isAPEnabled) {
+	public ChangeAPState(Activity activity, WifiApManager wifiApManager, Boolean isAPEnabled) {
 		this.activity = activity;
 		this.wifiApManager = wifiApManager;
 		this.isEnabled = isAPEnabled;

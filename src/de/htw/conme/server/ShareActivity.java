@@ -6,17 +6,13 @@ package de.htw.conme.server;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.provider.Settings.Secure;
 import android.view.Menu;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.ToggleButton;
-import de.htw.conme.ChangedAPState;
+import de.htw.conme.ChangeAPState;
 import de.htw.conme.R;
 import de.htw.conme.WifiConfig;
-import de.htw.conme.client.NetChangedReceiver;
 
 /**
  * @author Iyad Al-Sahwi
@@ -26,20 +22,20 @@ public class ShareActivity extends Activity {
 
 	private WifiConfig wifiConfig;
 	private WifiApManager wifiApManager;
-	private TextView listConnectedClients;
+//	private TextView listConnectedClients;
 	private ToggleButton toggleAPButton;
 	private Intent serverIntent;
 	private String ssid;
 	private ClientListUpdater clientListUpdater;
 	private boolean isServiceRunning;
-	public static final String NETWORK_BRANDING = "WLAN-"; 
+	public static final String NETWORK_BRANDING = "WLAN||"; 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_share);
 		
-		listConnectedClients = (TextView) findViewById(R.id.listConnectedClients);
+//		listConnectedClients = (TextView) findViewById(R.id.listConnectedClients);
 		toggleAPButton = (ToggleButton) findViewById(R.id.toggleAP);
 		
 		wifiApManager = new WifiApManager(this);
@@ -56,6 +52,7 @@ public class ShareActivity extends Activity {
 			clientListUpdater = new ClientListUpdater(this);
 		
 		isServiceRunning = false;
+		
 	}
 	
 
@@ -87,21 +84,22 @@ public class ShareActivity extends Activity {
 			if(isAPEnabled) {
 				
 				registerReceiver(clientListUpdater, new IntentFilter("de.htw.conme.UPDATE_CLIENT_LIST"));
-				
-//				loadConnectedClients();
-				
-				String androidID = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
-				
-				serverIntent = new Intent(this, ServerService.class);
-				serverIntent.putExtra("androidID", androidID);
-				startService(serverIntent);
 				isServiceRunning = true;
 				
+//				String androidID = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
+				
+				serverIntent = new Intent(this, ServerService.class);
+//				serverIntent.putExtra("androidID", androidID);
+				startService(serverIntent);
+				
+				
 			}else if(isServiceRunning){
+				clientListUpdater.cleanup();
 				unregisterReceiver(clientListUpdater);
 				stopService(serverIntent);
 				isServiceRunning = false;
-				listConnectedClients.setText("");
+				
+//				listConnectedClients.setText("");
 			}
 		}
 	}
@@ -113,18 +111,18 @@ public class ShareActivity extends Activity {
 		return true;
 	}
 
-	private void loadConnectedClients() {
-		
-		ClientListTask clientIPTask = new ClientListTask(wifiApManager, listConnectedClients);
-		clientIPTask.execute();
-		
-//		textView1.append("gateway: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().gateway) + "\n");
-//		textView1.append("dns1: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().dns1) + "\n");
-//		textView1.append("dns2: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().dns2) + "\n");
+//	private void loadConnectedClients() {
 //		
-//		textView1.append("wifiApManager.getWifiApConfiguration().SSID: " + wifiApManager.getWifiApConfiguration().SSID+ "\n");
-//		textView1.append("wifiConfig.SSID: " + wifiConfig.SSID + "\n");
-	}
+//		ClientListTask clientIPTask = new ClientListTask(wifiApManager, listConnectedClients);
+//		clientIPTask.execute();
+//		
+////		textView1.append("gateway: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().gateway) + "\n");
+////		textView1.append("dns1: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().dns1) + "\n");
+////		textView1.append("dns2: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().dns2) + "\n");
+////		
+////		textView1.append("wifiApManager.getWifiApConfiguration().SSID: " + wifiApManager.getWifiApConfiguration().SSID+ "\n");
+////		textView1.append("wifiConfig.SSID: " + wifiConfig.SSID + "\n");
+//	}
 	
 	public String intToIp(int addr) {
 	    return  ((addr & 0xFF) + "." + 
@@ -140,7 +138,7 @@ public class ShareActivity extends Activity {
 //		if(!isChecked && serverSocket != null)
 //			serverSocket.closeServer();
 		
-		ChangedAPState changeApState = new ChangedAPState(this, wifiApManager, isChecked);
+		ChangeAPState changeApState = new ChangeAPState(this, wifiApManager, isChecked);
 		changeApState.execute(wifiConfig);
 	}
 

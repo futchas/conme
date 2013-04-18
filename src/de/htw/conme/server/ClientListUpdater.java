@@ -4,15 +4,11 @@
 package de.htw.conme.server;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.TableLayout;
@@ -48,13 +44,13 @@ public class ClientListUpdater extends BroadcastReceiver {
 		table.setVisibility(View.VISIBLE);
 //		ConnectionInfo conInfo = (ConnectionInfo) intent.getParcelableExtra("clientConInfo");
 		ConnectionInfo conInfo;
-		if(intent.hasExtra("init")) {
-			conInfo = (ConnectionInfo) intent.getSerializableExtra("init");
+		if(intent.hasExtra("addInfo")) {
+			conInfo = (ConnectionInfo) intent.getSerializableExtra("addInfo");
 			clientList.add(conInfo);
 			addToTable(context, conInfo);
-		} else {
-			conInfo = (ConnectionInfo) intent.getSerializableExtra("refresh");
-			 for(int i=0; i<clientList.size(); i++) {
+		} else if(intent.hasExtra("updateInfo")) {
+			conInfo = (ConnectionInfo) intent.getSerializableExtra("updateInfo");
+			 for(int i=clientList.size()-1; i>=0; i--) {
 			    
 			    ConnectionInfo previousConInfo = clientList.get(i);
 			    
@@ -71,31 +67,33 @@ public class ClientListUpdater extends BroadcastReceiver {
 	private void updateTableRow(ConnectionInfo conInfo, int index) {
 
 		TableRow row = (TableRow) table.getChildAt(index);
-	    
+		
 		TextView device = (TextView) row.findViewById(R.id.device_cell);
 	    device.setText(conInfo.getDevice());
 	    
 	    TextView date = (TextView) row.findViewById(R.id.date_cell);
-	    date.setText(conInfo.getStringDate());
+	    date.setText(conInfo.getStartDate());
 
 	    TextView duration = (TextView) row.findViewById(R.id.duration_cell);
 	    duration.setText(conInfo.getDuration());
 	    
 	    TextView dataUsage = (TextView) row.findViewById(R.id.data_usage_cell);
-	    dataUsage.setText(String.valueOf(conInfo.getTotalDataUsage()));
+	    dataUsage.setText(conInfo.getTotalDataUsageInKB());
 	}
 
 	private void addToTable(Context context, ConnectionInfo conInfo) {
 		
 		TableRow row = new TableRow(context);
+		row.setBackgroundColor(Color.parseColor("#DDEEFF"));
 	    row.setGravity(Gravity.CENTER);
-
+//	    row.setPadding(20, 5, 5, 5);
 	    TextView device = new TextView(context);
+	    device.setPadding(10, 0, 0, 0);
 	    device.setText(conInfo.getDevice());
 	    device.setId(R.id.device_cell);
 	    
 	    TextView date = new TextView(context);
-	    date.setText(conInfo.getStringDate());
+	    date.setText(conInfo.getStartDate());
 	    date.setId(R.id.date_cell);
 	    
 	    TextView duration = new TextView(context);
@@ -103,7 +101,7 @@ public class ClientListUpdater extends BroadcastReceiver {
 	    duration.setId(R.id.duration_cell);
 
 	    TextView dataUsage = new TextView(context);
-	    dataUsage.setText(String.valueOf(conInfo.getTotalDataUsage()));
+	    dataUsage.setText(conInfo.getTotalDataUsageInKB());
 	    dataUsage.setId(R.id.data_usage_cell);
 	    
 	    row.addView(device);
@@ -112,5 +110,17 @@ public class ClientListUpdater extends BroadcastReceiver {
 	    row.addView(dataUsage);
 	    table.addView(row);
 	}
+
+	public void cleanup() {
+		// Don't remove the header row
+		for(int i = 1; i < table.getChildCount(); i++){
+				table.removeViewAt(i);
+		}
+		
+		clientList.clear();
+		table.setVisibility(View.GONE);
+	}
+	
+	
 	
 }

@@ -28,28 +28,30 @@
     </LinearLayout>
     
     <TextView
-        android:id="@+id/listConnectedClients"
+        android:id="@+id/labelConnectedClients"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/linearLayout1"
         android:layout_marginTop="20dp"
-        android:text="@string/txt_clients_none"
+        android:text="Connected Clients"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TableLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/listConnectedClients"
+        android:layout_below="@+id/labelConnectedClients"
         android:id="@+id/clientList"
-        android:layout_marginTop="43dp" >
+        android:layout_marginTop="20dp" >
 	    
 	    <TableRow
+	        android:background="#DDEEFF"
 	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
+	        android:layout_height="1dp"
 	        android:gravity="left" >
 	        <TextView
+	            android:paddingLeft="5dp"
 	            android:text="Device"
 	            android:textAppearance="?android:attr/textAppearanceMedium" />
 	        <TextView
@@ -59,7 +61,7 @@
 	            android:text="Duration"
 	            android:textAppearance="?android:attr/textAppearanceMedium" />
 	        <TextView
-	            android:text="Data usage"
+	            android:text="Data usage (KB)"
 	            android:textAppearance="?android:attr/textAppearanceMedium" />
 	    </TableRow>
         

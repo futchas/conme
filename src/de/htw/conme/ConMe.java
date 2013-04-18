@@ -29,30 +29,6 @@ public class ConMe extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_con_me);
 		
-//		DateTime start = new DateTime(2004, 12, 25, 0, 0, 0, 0);
-//		DateTime end = new DateTime(2005, 1, 1, 5, 6, 3, 2);
-//
-//		// duration in ms between two instants
-//		Period period = new Period(start, end);
-//		
-//		PeriodFormatter formatter = new PeriodFormatterBuilder()
-//		.printZeroAlways()
-//        .minimumPrintedDigits(2)
-//        .appendHours()
-//        .appendSeparator(":")
-//        .printZeroAlways()
-//        .minimumPrintedDigits(2)
-//        .appendMinutes()
-//        .appendSeparator(":")
-//        .printZeroAlways()
-//        .minimumPrintedDigits(2)
-//        .appendSeconds()
-//        .toFormatter();
-//		
-//		
-//		String duration = formatter.print(period);
-//		Log.i("cc",duration);
-		
 	}
 	
 	@Override
@@ -63,13 +39,11 @@ public class ConMe extends Activity {
 	}
 	
 	public void shareAP(View view) {
-		Intent intent = new Intent(this, ShareActivity.class);
-		startActivity(intent);
+		startActivity(new Intent(this, ShareActivity.class));
 	}
 
 	public void connectToAP(View view) {
-		Intent intent = new Intent(this, ConnectActivity.class);
-		startActivity(intent);
+		startActivity(new Intent(this, ConnectActivity.class));
 	}
 
 }

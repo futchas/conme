@@ -13,5 +13,7 @@
     <string name="txt_clients">Connected Users</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_connect">Connect to the internet</string>
+    <string name="title_activity_connection_details">ConnectionDetailsActivity</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

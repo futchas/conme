@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
-import java.io.StreamCorruptedException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -23,73 +22,74 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings.Secure;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.TextView;
+import de.htw.conme.R;
 import de.htw.conme.server.ServerService;
 
 /**
  * @author Iyad Al-Sahwi
  *
  */
-public class Client extends AsyncTask<Integer, Void, Socket> {
+public class Client extends AsyncTask<Void, Void, Void> {
 
 	private WifiManager wifi;
-	private Context context;	
 	private ConnectionInfo clientConInfo;
 	private String incomingMsg;
-	private String outgoingMsg;
-	private boolean isConnected;
 	private long startReceivedData;
 	private long startTransmittedData;
 	private String androidID;
 	private Socket socket;
+	private Timer timerSendingToServer;
+	
+	private TextView device;
+	private TextView startDate;
+	private TextView duration;
+	private TextView endDate;
+	private TextView transmittedData;
+	private TextView receivedData;
+	private TextView totalData;
+	
 	public static final int SENDING_INTERVAL = 10000; //in ms 
 	
-	public Client(Context context, WifiManager wifiManager) {
-		isConnected = true;
-		this.context = context;
+	public Client(Context context, WifiManager wifiManager, View conDetailsView) {
 		this.wifi = wifiManager;
 		startTransmittedData = TrafficStats.getTotalTxBytes();
 		startReceivedData = TrafficStats.getTotalRxBytes();
 		androidID = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+		
+		device = (TextView) conDetailsView.findViewById(R.id.server_device);
+		startDate = (TextView) conDetailsView.findViewById(R.id.startDate);
+		endDate = (TextView) conDetailsView.findViewById(R.id.EndDate);
+		duration = (TextView) conDetailsView.findViewById(R.id.connection_duration);
+		transmittedData = (TextView) conDetailsView.findViewById(R.id.data_transmitted);
+		receivedData = (TextView) conDetailsView.findViewById(R.id.data_received);
+		totalData = (TextView) conDetailsView.findViewById(R.id.total_data_usage);
+		
 	}
-	
-	public void setConnected(boolean isConnected) {
-		this.isConnected = isConnected;
-	}
-	
-	public boolean isConnected() {
-		return isConnected;
-	}
-
 
 	@Override
-	protected Socket doInBackground(Integer... params) {
+	protected Void doInBackground(Void... params) {
 	
 	    try {
-//	    	InetAddress ip2 =InetAddress.getByName("Blablub");
-//	    	ip = getLocalIpAddress();
-//	    	InetAddress ip2 =InetAddress.getByName(gateway);
-	    	
-//	    	String mac = wifi.getConnectionInfo().getMacAddress();
-//	    	String ipAdress = intToIp(wifi.getConnectionInfo().getIpAddress());
 	    	
 	    	String gateway = intToIp(wifi.getDhcpInfo().gateway);
 	    	socket = new Socket(gateway, ServerService.PORT);
-
-	    	String manufacturer = Build.MANUFACTURER;
+	    	socket.setSoTimeout(30000);
+	    	
+	    	String manufacturer = Build.MODEL;
 	    	clientConInfo = new ConnectionInfo(androidID, manufacturer, startTransmittedData, startReceivedData);
 			ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
 	    	objectOut.writeObject(clientConInfo);
-	    	outgoingMsg = clientConInfo.toString(); 
 	    	
 	    	BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			incomingMsg = in.readLine() + System.getProperty("line.separator");
 			
+			publishProgress();
+			
 			Log.i("Client", "Received from Server: " + incomingMsg);
 			
-	    	socket.setSoTimeout(30000);
-	    	
-	    	Timer timer = new Timer();
+	    	timerSendingToServer = new Timer();
 			
 			TimerTask timerTask = new TimerTask() {
 				public void run() {
@@ -100,19 +100,8 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 					}
 				}
 			};
-			
-			timer.scheduleAtFixedRate(timerTask, SENDING_INTERVAL, SENDING_INTERVAL);
-	    	
-//	    	ConnectionInfo conInfoOut = new ConnectionInfo(androidID, startTransmittedData, startReceivedData);
-//			ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
-//	    	objectOut.writeObject(conInfoOut);  
-//	    	outgoingMsg = conInfoOut.toString(); 
-//			
-//	    	ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
-//	    	ConnectionInfo conInfoIn = (ConnectionInfo) objectIn.readObject();
-//	    	incomingMsg = conInfoIn.toString();
 
-	    	return socket;
+			timerSendingToServer.scheduleAtFixedRate(timerTask, 0, SENDING_INTERVAL);
 	
 	    } catch(SocketTimeoutException e) {
 	        Log.e("Client", "CLIENT SOCKET TIMEOUT!", e);
@@ -127,7 +116,7 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 	}
 
 	private void send() throws IOException {
-		
+
 		long currentTransmittedData = TrafficStats.getTotalTxBytes();
 		long currentReceivedData = TrafficStats.getTotalRxBytes();
 		
@@ -136,7 +125,21 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 		
 		ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());
     	objectOut.writeObject(clientConInfo);
+    	
+    	publishProgress();
+    	
     	Log.i("Client", "Send from Client to Server: " + clientConInfo.toString());
+	}
+
+	@Override
+	protected void onProgressUpdate(Void... values) {
+		device.setText(clientConInfo.getDevice());
+		startDate.setText(clientConInfo.getStartDate());
+		endDate.setText(clientConInfo.getEndDate());
+		duration.setText(clientConInfo.getDuration());
+		transmittedData.setText(clientConInfo.getTransmittedData());
+		receivedData.setText(clientConInfo.getReceivedData());
+		totalData.setText(clientConInfo.getTotalDataUsageInKB());
 	}
 
 	public String intToIp(int addr) {
@@ -146,22 +149,30 @@ public class Client extends AsyncTask<Integer, Void, Socket> {
 	            ((addr >>>= 8) & 0xFF));
 	}
 	
-	
-	protected void onPostExecute(Socket socket) {
+//	protected void onPostExecute(Socket socket) {
+//
+//		if(socket != null) {
+//				
+//        	Log.i("Client", "Client sent: " + outgoingMsg);
+//			Toast.makeText(context, "\nClient sent: " + outgoingMsg + "\n", Toast.LENGTH_LONG).show();
+//
+//	        Log.i("Client", "Client received: " + incomingMsg);
+//			Toast.makeText(context, "Client received: " + incomingMsg + "\n", Toast.LENGTH_LONG).show();
+//			
+////			Intent conDetails = new Intent(context, ConnectionDetailsActivity.class);
+////			conDetails.putExtra("clientInfo", clientConInfo);
+////			context.startActivity(conDetails);
+//		        
+//		} else {
+//			Log.d("Client", "Can't connect to server!");
+//			Toast.makeText(context, "Can't connect to server!", Toast.LENGTH_LONG).show();
+//		}
+//		
+//    }
 
-		if(socket != null) {
-				
-        	Log.i("Client", "Client sent: " + outgoingMsg);
-			Toast.makeText(context, "\nClient sent: " + outgoingMsg + "\n", Toast.LENGTH_LONG).show();
-
-	        Log.i("Client", "Client received: " + incomingMsg);
-			Toast.makeText(context, "Client received: " + incomingMsg + "\n", Toast.LENGTH_LONG).show();
-		        
-		} else {
-			Log.d("Client", "Can't connect to server!");
-			Toast.makeText(context, "Can't connect to server!", Toast.LENGTH_LONG).show();
-		}
-		
-    }
+	public void stop() {
+		if(timerSendingToServer != null)
+			timerSendingToServer.cancel();
+	}
 
 }

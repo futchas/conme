@@ -16,25 +16,24 @@ import org.joda.time.format.PeriodFormatterBuilder;
  * @author Iyad Al-Sahwi
  *
  */
-public class ConnectionInfo implements Serializable{
+
+public class ConnectionInfo implements Serializable {
 
 	private static final long serialVersionUID = 7392125719654130170L;
-	private String id;
+	private String androidId;
 	private DateTime startDate;
 	private DateTime endDate;
 	private String duration; // hh:mm:ss
-	private long startReceivedData;
-	private long startTransmittedData;
-	private long startTotalDataUsage;
-	private long receivedData;
-	private long transmittedData;
-	private long totalDataUsage;
+	private long startReceivedData, receivedData;
+	private long startTransmittedData, transmittedData;
+	private long startTotalDataUsage, totalDataUsage;
 	private String device;
 	
 	public ConnectionInfo(String id, String device, long startTransmittedData, long startReceivedData) {
-		this.id = id;
+		this.androidId = id;
 		this.device = device;
 		this.startDate = new DateTime();
+		this.duration = "00:00:00";
 		this.startTransmittedData = startTransmittedData;
 		this.startReceivedData = startReceivedData;
 		this.transmittedData = startTransmittedData;
@@ -44,7 +43,7 @@ public class ConnectionInfo implements Serializable{
 	}
 
 	public String getId() {
-		return id;
+		return androidId;
 	}
 
 
@@ -52,12 +51,22 @@ public class ConnectionInfo implements Serializable{
 		return device;
 	}
 	
-	public String getStringDate() {
-		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd-MM-yyyy");
-		return dtf.print(startDate);
+	
+	public String getStartDate() {
+		return getStringDate(startDate);
+	}
+
+	public String getEndDate() {
+		return getStringDate(endDate);
 	}
 	
-	private void setDuration(DateTime endDate) {
+	private String getStringDate(DateTime date) {
+		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd-MM-yyyy");
+		return dtf.print(date);
+	}
+	
+	
+	private void setDuration() {
 		if(startDate != null && endDate != null) {
 			Period period = new Period(startDate, endDate);
 			
@@ -76,39 +85,36 @@ public class ConnectionInfo implements Serializable{
 	        .toFormatter();
 			 
 			this.duration = formatter.print(period);
-		} else
-			this.duration = "00:00:00";
+		}
 	}
 
 	public String getDuration() {
 		return duration;
 	}
-
-
-	public DateTime getStartDate() {
-		return startDate;
-	}
-
-
-	public DateTime getEndDate() {
-		return endDate;
-	}
 	
 	public void setEndDate(DateTime endDate) {
 		this.endDate = endDate;
-		setDuration(endDate);
+		setDuration();
 	}
-
-//	public void setStartDate(DateTime startDate) {
-//		this.startDate = startDate;
-//	}
-
+	
 	public long getTotalDataUsage() {
 		return totalDataUsage - startTotalDataUsage;
 	}
 
-	public long getTotalDataUsageInMB() {
-		return getTotalDataUsage() / 1024 / 1024;
+//	public float getTotalDataUsageInMB() {
+//		return getTotalDataUsage() / 1024f / 1024f;
+//	}
+	
+	public String getTotalDataUsageInKB() {
+		return String.valueOf(getTotalDataUsage() / 1024f);
+	}
+	
+	public String getReceivedData() {
+		return String.valueOf((receivedData - startReceivedData)/1024f);
+	}
+
+	public String getTransmittedData() {
+		return String.valueOf((transmittedData - startTransmittedData)/1024f);
 	}
 
 	public void setTotalDataUsage(long transmitted, long received) {
@@ -120,7 +126,7 @@ public class ConnectionInfo implements Serializable{
 
 	@Override
 	public String toString() {
-		StringBuilder message = new StringBuilder("ID: " + id + ", startDate: " + startDate);
+		StringBuilder message = new StringBuilder("ID: " + androidId + ", startDate: " + startDate + ", Duration: " + duration);
 		if(endDate != null)
 			message.append(", endDate: " + endDate);
 		if(startTotalDataUsage != 0)

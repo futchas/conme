@@ -52,19 +52,6 @@ public class WifiApManager {
 		}
 	}
 	
-	private void setWifiTetheringEnabled(boolean enable) {
-
-	    Method[] methods = mWifiManager.getClass().getDeclaredMethods();
-	    for (Method method : methods) {
-	        if (method.getName().equals("setWifiApEnabled")) {
-	            try {
-	                method.invoke(mWifiManager, null, enable);
-	            } catch (Exception ex) {
-	            }
-	            break;
-	        }
-	    }
-	}
 	
 	/**
      * Gets the Wi-Fi enabled state.

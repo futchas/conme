@@ -5,15 +5,12 @@ package de.htw.conme.server;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.io.StreamCorruptedException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-
-import org.joda.time.DateTime;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -29,7 +26,6 @@ public class ServerService extends IntentService {
 
 	private ServerSocket serverSocket;
 	private String incomingMsg;
-	private String outgoingMsg;
 //	private String androidID;
 	public static final int PORT = 3333; 
 	
@@ -45,23 +41,28 @@ public class ServerService extends IntentService {
 		
 //		androidID = intent.getStringExtra("androidID");
 		
-		try {
-	        serverSocket = new ServerSocket(PORT);	      
+        try {
+			serverSocket = new ServerSocket(PORT);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}	      
 
-	        while (true) {
+        while (!serverSocket.isClosed()) {
 	        	
+	        try {
 	        	Socket socket = serverSocket.accept();
+	        	socket.setSoTimeout(30000); //client timeout after 30 seconds
 	        	
 	        	ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
 	        	ConnectionInfo clientConInfo = (ConnectionInfo) objectIn.readObject();
 	        	incomingMsg = clientConInfo.toString();
 	    		
-	        	String manufacturer = Build.MANUFACTURER;
+	        	String device = Build.MODEL;
 		        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-		        out.write(manufacturer + System.getProperty("line.separator"));
+		        out.write(device + System.getProperty("line.separator"));
 		        out.flush();
 		        
-		        startClientListUpdater("init", clientConInfo);
+		        startClientListUpdater("addInfo", clientConInfo);
 	        	
 //				ConnectionInfo serverConInfo = new ConnectionInfo(androidID);
 //				ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
@@ -69,26 +70,29 @@ public class ServerService extends IntentService {
 //		    	outgoingMsg = serverConInfo.toString();
 		    	
 		    	Log.i("Server", "Server received: " + incomingMsg);
-		        Log.i("Server", "Server sent: " + manufacturer);
-		    	
-		        socket.setSoTimeout(30000);
+		        Log.i("Server", "Server sent: " + device);
 		        
 		    	do {
 		    		processCurrentClient(socket, clientConInfo);
-		    	} while(true);
-		        
-	        }
-	    } catch(SocketTimeoutException e) {
-	        Log.e("Server", "SOCKET TIMEOUT!", e);
-	        e.printStackTrace();
-	    } catch (InterruptedIOException e) {
-	        //if timeout occurs
-	        e.printStackTrace();
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    } catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} 
+		    	} while(!socket.isClosed());
+		    	
+        	} catch(SocketTimeoutException e) {
+    	        Log.e("Server", "SOCKET TIMEOUT!", e);
+//    	        e.printStackTrace();
+    	    } catch (StreamCorruptedException e) {
+    	    	Log.e("Server", "StreamCorruptedException", e);
+				e.printStackTrace();
+			} catch (IOException e) {
+				Log.e("Server", "IOException", e);
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				Log.e("Server", "ClassNotFoundException", e);
+				e.printStackTrace();
+			}
+        }
+        
+        Log.i("Server", "Service is ending!");
+	    
 	}
 
 	private void startClientListUpdater(String state, ConnectionInfo clientConInfo) {
@@ -102,9 +106,22 @@ public class ServerService extends IntentService {
 		ObjectInputStream objectIn = new ObjectInputStream(socket.getInputStream()); 
 		ConnectionInfo clientConInfo = (ConnectionInfo) objectIn.readObject();
 //		clientConInfo.setEndDate(new DateTime());
-		startClientListUpdater("refresh", clientConInfo);
-			
+		startClientListUpdater("updateInfo", clientConInfo);
+		
     	Log.i("Server", "Current Client Info " + clientConInfo);
 	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		try {
+			serverSocket.close();
+			Log.i("Server", "Server Socket closed!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 
 }

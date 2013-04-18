@@ -66,8 +66,6 @@ public class AlertDialogPositiveClicked implements OnClickListener {
 			wifiDetails.setText("Connecting");
 		    Toast.makeText(context,"You are connecting to following wifi network: " + ssid, Toast.LENGTH_SHORT).show();
 		}
-		
-		wifi.startScan();
 
 	}
 	

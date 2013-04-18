@@ -16,13 +16,14 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
-import de.htw.conme.ChangedAPState;
+import de.htw.conme.ChangeAPState;
 import de.htw.conme.R;
 import de.htw.conme.server.WifiApManager;
 
@@ -33,31 +34,44 @@ import de.htw.conme.server.WifiApManager;
 public class ConnectActivity extends Activity {
 
 	private WifiManager wifi;
-	private BroadcastReceiver receiver;
+	private BroadcastReceiver scanWifiReceiver;
 	private ListView conMeNetworkList;
 	private ListView otherNetworkList;
 	private NetChangedReceiver netChangedReceiver;
 	private final int WIFI_SCAN_INTERVALS = 10000;
-	private Timer timer;
+	private Timer timerScanWifiNetworks;
+	private View conDetailsView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_connect);
+
+		createNewConnectionDetails();
 		
 		conMeNetworkList = (ListView) findViewById(R.id.conMeNetworkList);
 		otherNetworkList = (ListView) findViewById(R.id.otherNetworkList);
 		
 		wifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 		
-		if (receiver == null)
-			receiver = new ScanWifiReceiver(wifi);
+		if (scanWifiReceiver == null)
+			scanWifiReceiver = new ScanWifiReceiver(wifi);
 		
 		if (netChangedReceiver == null) {
-			netChangedReceiver = new NetChangedReceiver(this, wifi);
+			netChangedReceiver = new NetChangedReceiver(wifi);
 			registerReceiver(netChangedReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 		}
 	}
+	
+	public void createNewConnectionDetails() {
+		LayoutInflater inflater = this.getLayoutInflater();
+		conDetailsView = inflater.inflate(R.layout.connection_details, null);
+	}
+	
+	public View getConnectionDetails() {
+		return conDetailsView;
+	}
+	
 	
 	public void showNetworksInList(List<ScanResult> conMeNetworks, List<ScanResult> otherNetworks){
 		
@@ -85,23 +99,23 @@ public class ConnectActivity extends Activity {
 	protected void onPause() {
 		super.onPause();
 
-		if(receiver != null)
-			unregisterReceiver(receiver);
-		if(timer != null)
-			timer.cancel();
+		if(scanWifiReceiver != null)
+			unregisterReceiver(scanWifiReceiver);
+		if(timerScanWifiNetworks != null)
+			timerScanWifiNetworks.cancel();
 	}
 	
 	protected void onResume() {
 		super.onResume();
 		
-		registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		registerReceiver(scanWifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		
 		WifiApManager accessPointManager = new WifiApManager(wifi);
 		
 		//Unfortunately it's not possible to tether and use Wifi simultaneously.
 		//disable access point if it's enabled
 		if(accessPointManager.isWifiApEnabled()) {
-			ChangedAPState changeApState = new ChangedAPState(this, accessPointManager, false);
+			ChangeAPState changeApState = new ChangeAPState(this, accessPointManager, false);
 			changeApState.execute();
 		}else
 			onResumeFurther();
@@ -114,7 +128,7 @@ public class ConnectActivity extends Activity {
             wifi.setWifiEnabled(true);
 		}
 		
-		timer = new Timer();
+		timerScanWifiNetworks = new Timer();
 			
 		TimerTask timerTask = new TimerTask() {
 			@Override
@@ -124,7 +138,7 @@ public class ConnectActivity extends Activity {
 		};
 		
 		//Run Task every configured interval in ms
-		timer.scheduleAtFixedRate(timerTask, 0, WIFI_SCAN_INTERVALS);
+		timerScanWifiNetworks.scheduleAtFixedRate(timerTask, 0, WIFI_SCAN_INTERVALS);
 	}
 
 	@Override
@@ -133,6 +147,17 @@ public class ConnectActivity extends Activity {
 		getMenuInflater().inflate(R.menu.activity_connect, menu);
 		return true;
 	}
+
+//	@Override
+//	public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//        case R.id.connection_details:
+//	        startActivity(new Intent(this, About.class));
+//	        return true;
+//        default:
+//        	return super.onOptionsItemSelected(item);
+//        }
+//    }
 
 	@Override
 	protected void onDestroy() {

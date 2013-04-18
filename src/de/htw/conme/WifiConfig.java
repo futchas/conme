@@ -11,8 +11,6 @@ import android.net.wifi.WifiConfiguration;
  */
 public class WifiConfig extends WifiConfiguration{
 	
-//	public static String networkSSID = "Blablub";
-//	public static String key = "Badabum123";
 	
 //	public WifiConfig(boolean isAccessPoint){
 //		
@@ -39,8 +37,6 @@ public class WifiConfig extends WifiConfiguration{
 //	}
 	
 	public WifiConfig(String ssid, String key, boolean isAccessPoint){
-		
-//		wifiConfig.hiddenSSID = true;
 		this.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
 		if(isAccessPoint) { //AP don't need quotation marks for the SSID or network key
 			this.SSID = ssid;
@@ -50,6 +46,5 @@ public class WifiConfig extends WifiConfiguration{
 			this.SSID = quotation + ssid + quotation;
 			this.preSharedKey = quotation + key + quotation;
 		}
-			
 	}
 }
