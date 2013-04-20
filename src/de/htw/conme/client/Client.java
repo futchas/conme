@@ -77,8 +77,8 @@ public class Client extends AsyncTask<Void, Void, Void> {
 	    	socket = new Socket(gateway, ServerService.PORT);
 	    	socket.setSoTimeout(30000);
 	    	
-	    	String manufacturer = Build.MODEL;
-	    	clientConInfo = new ConnectionInfo(androidID, manufacturer, startTransmittedData, startReceivedData);
+	    	String device = Build.MODEL;
+	    	clientConInfo = new ConnectionInfo(androidID, device, startTransmittedData, startReceivedData);
 			ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());  
 	    	objectOut.writeObject(clientConInfo);
 	    	
@@ -104,6 +104,7 @@ public class Client extends AsyncTask<Void, Void, Void> {
 			timerSendingToServer.scheduleAtFixedRate(timerTask, 0, SENDING_INTERVAL);
 	
 	    } catch(SocketTimeoutException e) {
+	    	wifi.disconnect();
 	        Log.e("Client", "CLIENT SOCKET TIMEOUT!", e);
 	        e.printStackTrace();
 	    } catch (UnknownHostException e) {

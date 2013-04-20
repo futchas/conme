@@ -3,14 +3,18 @@
  */
 package de.htw.conme.server;
 
+import java.util.UUID;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 import de.htw.conme.ChangeAPState;
+import de.htw.conme.ConMeUtils;
 import de.htw.conme.R;
 import de.htw.conme.WifiConfig;
 
@@ -22,31 +26,32 @@ public class ShareActivity extends Activity {
 
 	private WifiConfig wifiConfig;
 	private WifiApManager wifiApManager;
-//	private TextView listConnectedClients;
 	private ToggleButton toggleAPButton;
 	private Intent serverIntent;
 	private String ssid;
 	private ClientListUpdater clientListUpdater;
 	private boolean isServiceRunning;
-	public static final String NETWORK_BRANDING = "WLAN||"; 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_share);
 		
-//		listConnectedClients = (TextView) findViewById(R.id.listConnectedClients);
 		toggleAPButton = (ToggleButton) findViewById(R.id.toggleAP);
 		
 		wifiApManager = new WifiApManager(this);
 		
-		// generate uniqueNumber
-		//SSID = "WLAN-" + uniqueNumber
-		//KEY = encrypt(uniqueNumber);
+		// random hex values (8 values)
+		String uuid = UUID.randomUUID().toString().substring(0, 8);
+		ssid = ConMeUtils.NETWORK_BRANDING + uuid;
+		try {
+			wifiConfig = new WifiConfig(ssid, uuid, true);
+		} catch (Exception e) {
+			Toast.makeText(this,"Automatic Wifi configurations couldn't be set!", Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
 		
-		ssid = NETWORK_BRANDING + "T3XH7UW2B5";
-		String key = "f409!k23c#d.92" + ssid.substring(5, 15);
-		wifiConfig = new WifiConfig(ssid, key, true);
+//		String key = "f409!k23c#d.92" + ssid.substring(5, 15);
 		
 		if (clientListUpdater == null)
 			clientListUpdater = new ClientListUpdater(this);
@@ -86,8 +91,6 @@ public class ShareActivity extends Activity {
 				registerReceiver(clientListUpdater, new IntentFilter("de.htw.conme.UPDATE_CLIENT_LIST"));
 				isServiceRunning = true;
 				
-//				String androidID = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
-				
 				serverIntent = new Intent(this, ServerService.class);
 //				serverIntent.putExtra("androidID", androidID);
 				startService(serverIntent);
@@ -99,7 +102,6 @@ public class ShareActivity extends Activity {
 				stopService(serverIntent);
 				isServiceRunning = false;
 				
-//				listConnectedClients.setText("");
 			}
 		}
 	}
@@ -111,19 +113,6 @@ public class ShareActivity extends Activity {
 		return true;
 	}
 
-//	private void loadConnectedClients() {
-//		
-//		ClientListTask clientIPTask = new ClientListTask(wifiApManager, listConnectedClients);
-//		clientIPTask.execute();
-//		
-////		textView1.append("gateway: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().gateway) + "\n");
-////		textView1.append("dns1: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().dns1) + "\n");
-////		textView1.append("dns2: " + intToIp(wifiApManager.getmWifiManager().getDhcpInfo().dns2) + "\n");
-////		
-////		textView1.append("wifiApManager.getWifiApConfiguration().SSID: " + wifiApManager.getWifiApConfiguration().SSID+ "\n");
-////		textView1.append("wifiConfig.SSID: " + wifiConfig.SSID + "\n");
-//	}
-	
 	public String intToIp(int addr) {
 	    return  ((addr & 0xFF) + "." + 
 	            ((addr >>>= 8) & 0xFF) + "." + 
@@ -135,12 +124,8 @@ public class ShareActivity extends Activity {
 		
 		boolean isChecked = ((ToggleButton) view).isChecked();
 		
-//		if(!isChecked && serverSocket != null)
-//			serverSocket.closeServer();
-		
 		ChangeAPState changeApState = new ChangeAPState(this, wifiApManager, isChecked);
 		changeApState.execute(wifiConfig);
 	}
-
 
 }

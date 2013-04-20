@@ -9,8 +9,9 @@ import android.net.wifi.WifiConfiguration;
  * @author Iyad Al-Sahwi
  *
  */
-public class WifiConfig extends WifiConfiguration{
+public class WifiConfig extends WifiConfiguration {
 	
+	private final String seed = "x0UsFP83UOFtrfWYzWJ6P9Gt3Qb7UTCYrJn1j14wCT1vTxto8ygRFMq5QlRGk43";
 	
 //	public WifiConfig(boolean isAccessPoint){
 //		
@@ -36,8 +37,9 @@ public class WifiConfig extends WifiConfiguration{
 ////		this.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
 //	}
 	
-	public WifiConfig(String ssid, String key, boolean isAccessPoint){
+	public WifiConfig(String ssid, String uuid, boolean isAccessPoint) throws Exception{
 		this.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+		String key = SimpleCrypto.encrypt(seed, uuid);
 		if(isAccessPoint) { //AP don't need quotation marks for the SSID or network key
 			this.SSID = ssid;
 			this.preSharedKey = key;
@@ -47,4 +49,5 @@ public class WifiConfig extends WifiConfiguration{
 			this.preSharedKey = quotation + key + quotation;
 		}
 	}
+	
 }

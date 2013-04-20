@@ -10,7 +10,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 import android.view.View;
-import de.htw.conme.server.ShareActivity;
+import de.htw.conme.ConMeUtils;
 
 /**
  * @author Iyad Al-Sahwi
@@ -36,7 +36,7 @@ public class NetChangedReceiver extends BroadcastReceiver {
         if (netInfo.getState() == State.CONNECTED) {
         	String ssid = wifi.getConnectionInfo().getSSID();
 
-        	if (ssid.startsWith(ShareActivity.NETWORK_BRANDING)) {
+        	if (ConMeUtils.isConMeNetwork(ssid)) {
         		
         		ConnectActivity conActivity = ((ConnectActivity) context);
         				

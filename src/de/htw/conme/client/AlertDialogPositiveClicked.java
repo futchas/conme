@@ -50,21 +50,33 @@ public class AlertDialogPositiveClicked implements OnClickListener {
 		if(isConnected) {
 			disconnect();
 		} else {
-			String key = "f409!k23c#d.92" + ssid.substring(5, 15);
-			WifiConfig wifiConfig = new WifiConfig(ssid, key, false);
-
-			ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-			NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-			if(wifiInfo.isConnectedOrConnecting()) {
-				disconnect();
+//			String key = "f409!k23c#d.92" + ssid.substring(5, 15);
+			// random hex values (8 values)
+			String uuid = ssid.substring(ssid.lastIndexOf('|') + 1);
+			
+			WifiConfig wifiConfig;
+			try {
+				wifiConfig = new WifiConfig(ssid, uuid, false);
+				
+				ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+				NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+				if(wifiInfo.isConnectedOrConnecting()) {
+					disconnect();
+				}
+				
+				int netId = wifi.addNetwork(wifiConfig);
+				wifi.enableNetwork(netId, true);
+				wifi.reconnect();
+				
+				wifiDetails.setText("Connecting");
+			    Toast.makeText(context,"You are connecting to " + ssid, Toast.LENGTH_SHORT).show();
+			    
+			} catch (Exception e) {
+				Toast.makeText(context,"Could not be connected!" + ssid, Toast.LENGTH_SHORT).show();
+				e.printStackTrace();
 			}
+
 			
-			int netId = wifi.addNetwork(wifiConfig);
-			wifi.enableNetwork(netId, true);
-			wifi.reconnect();
-			
-			wifiDetails.setText("Connecting");
-		    Toast.makeText(context,"You are connecting to following wifi network: " + ssid, Toast.LENGTH_SHORT).show();
 		}
 
 	}
