@@ -51,13 +51,10 @@ public class ShareActivity extends Activity {
 			e.printStackTrace();
 		}
 		
-//		String key = "f409!k23c#d.92" + ssid.substring(5, 15);
-		
 		if (clientListUpdater == null)
 			clientListUpdater = new ClientListUpdater(this);
 		
 		isServiceRunning = false;
-		
 	}
 	
 

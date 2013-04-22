@@ -16,6 +16,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
+import de.htw.conme.ConMeUtils;
 import de.htw.conme.client.ConnectionInfo;
 
 /**
@@ -27,7 +28,6 @@ public class ServerService extends IntentService {
 	private ServerSocket serverSocket;
 	private String incomingMsg;
 //	private String androidID;
-	public static final int PORT = 3333; 
 	
 	public ServerService() {
 		super("ServerIntentService");
@@ -42,7 +42,7 @@ public class ServerService extends IntentService {
 //		androidID = intent.getStringExtra("androidID");
 		
         try {
-			serverSocket = new ServerSocket(PORT);
+			serverSocket = new ServerSocket(ConMeUtils.PORT);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}	      

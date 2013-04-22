@@ -24,8 +24,8 @@ import android.provider.Settings.Secure;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import de.htw.conme.ConMeUtils;
 import de.htw.conme.R;
-import de.htw.conme.server.ServerService;
 
 /**
  * @author Iyad Al-Sahwi
@@ -74,7 +74,7 @@ public class Client extends AsyncTask<Void, Void, Void> {
 	    try {
 	    	
 	    	String gateway = intToIp(wifi.getDhcpInfo().gateway);
-	    	socket = new Socket(gateway, ServerService.PORT);
+	    	socket = new Socket(gateway, ConMeUtils.PORT);
 	    	socket.setSoTimeout(30000);
 	    	
 	    	String device = Build.MODEL;
